@@ -27,8 +27,6 @@ use std::ffi::CString;
 use std::ffi::CStr;
 use std::ptr;
 
-
-
 #[no_mangle]
 pub extern "C" fn network_info_new(network_id: u8, protocol_magic: u32) -> *mut NetworkInfo {
     Box::into_raw(Box::new(NetworkInfo::new(network_id, protocol_magic)))
