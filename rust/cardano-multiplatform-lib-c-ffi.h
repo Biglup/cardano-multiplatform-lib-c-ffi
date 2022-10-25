@@ -43,4 +43,6 @@ transaction_metadatum_t* encode_json_str_to_metadatum(const char* json, Metadata
 
 const char* decode_metadatum_to_json_str(transaction_metadatum_t* ptr, MetadataJsonSchema schema);
 
+void free_c_str(const char* str);
+
 } // extern "C"

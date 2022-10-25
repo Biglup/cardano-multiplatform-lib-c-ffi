@@ -32,6 +32,16 @@ pub extern "C" fn free_buffer(buf: Buffer) {
 }
 
 #[no_mangle]
+pub extern "C" fn free_c_str(ptr: *mut c_char) {
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        drop(CString::from_raw(ptr));
+    }
+}
+
+#[no_mangle]
 /// This is intended for the C code to call for deallocating the
 /// Rust-allocated i32 array.
 pub unsafe extern "C" fn deallocate_rust_buffer(ptr: *mut i32, len: u32) {
