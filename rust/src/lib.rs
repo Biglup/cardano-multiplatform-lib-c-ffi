@@ -1,11 +1,12 @@
 mod ffi_utils;
+mod cml;
 
 extern crate cardano_multiplatform_lib;
 extern crate libc;
 
+
 use crate::ffi_utils::Buffer;
 
-use cardano_multiplatform_lib::address::NetworkInfo;
 use cardano_multiplatform_lib::metadata::TransactionMetadatum;
 use cardano_multiplatform_lib::metadata::MetadataJsonSchema;
 
@@ -26,40 +27,6 @@ use libc::c_char;
 use std::ffi::CString;
 use std::ffi::CStr;
 use std::ptr;
-
-#[no_mangle]
-pub extern "C" fn network_info_new(network_id: u8, protocol_magic: u32) -> *mut NetworkInfo {
-    Box::into_raw(Box::new(NetworkInfo::new(network_id, protocol_magic)))
-}
-
-#[no_mangle]
-pub extern "C" fn network_info_free(ptr: *mut NetworkInfo) {
-    if ptr.is_null() {
-        return;
-    }
-    unsafe {
-        Box::from_raw(ptr);
-    }
-}
-
-#[no_mangle]
-pub extern "C" fn network_info_network_id(ptr: *mut NetworkInfo) -> u8 {
-    let network_info = unsafe {
-        assert!(!ptr.is_null());
-        &mut *ptr
-    };
-    return network_info.network_id();
-}
-
-
-#[no_mangle]
-pub extern "C" fn network_info_protocol_magic(ptr: *mut NetworkInfo) -> u32 {
-    let network_info = unsafe {
-        assert!(!ptr.is_null());
-        &mut *ptr
-    };
-    return network_info.protocol_magic();
-}
 
 // metadata
 #[no_mangle]
@@ -256,12 +223,12 @@ pub extern "C" fn decode_plutus_datum_to_json_str(ptr: *mut PlutusData , schema:
 
 
 /* 
-/**
+
 * @param {TransactionHash} tx_body_hash
 * @param {ByronAddress} addr
 * @param {LegacyDaedalusPrivateKey} key
 * @returns {BootstrapWitness}
-*/
+
 export function make_daedalus_bootstrap_witness(tx_body_hash, addr, key) {
     _assertClass(tx_body_hash, TransactionHash);
     _assertClass(addr, ByronAddress);
@@ -270,12 +237,12 @@ export function make_daedalus_bootstrap_witness(tx_body_hash, addr, key) {
     return BootstrapWitness.__wrap(ret);
 }
 
-/**
+
 * @param {TransactionHash} tx_body_hash
 * @param {ByronAddress} addr
 * @param {Bip32PrivateKey} key
 * @returns {BootstrapWitness}
-*/
+
 export function make_icarus_bootstrap_witness(tx_body_hash, addr, key) {
     _assertClass(tx_body_hash, TransactionHash);
     _assertClass(addr, ByronAddress);
@@ -284,7 +251,7 @@ export function make_icarus_bootstrap_witness(tx_body_hash, addr, key) {
     return BootstrapWitness.__wrap(ret);
 }
 
-/**
+
 * Receives a script JSON string
 * and returns a NativeScript.
 * Cardano Wallet and Node styles are supported.
@@ -297,7 +264,7 @@ export function make_icarus_bootstrap_witness(tx_body_hash, addr, key) {
 * @param {string} self_xpub
 * @param {number} schema
 * @returns {NativeScript}
-*/
+
 export function encode_json_str_to_native_script(json, self_xpub, schema) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -318,13 +285,13 @@ export function encode_json_str_to_native_script(json, self_xpub, schema) {
     }
 }
 
-/**
+
 * Provide backwards compatibility to Alonzo by taking the max min value of both er
 * @param {TransactionOutput} output
 * @param {BigNum} coins_per_utxo_byte
 * @param {BigNum} coins_per_utxo_word
 * @returns {BigNum}
-*/
+
 export function compatible_min_ada_required(output, coins_per_utxo_byte, coins_per_utxo_word) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -344,11 +311,11 @@ export function compatible_min_ada_required(output, coins_per_utxo_byte, coins_p
     }
 }
 
-/**
+
 * @param {TransactionOutput} output
 * @param {BigNum} coins_per_utxo_byte
 * @returns {BigNum}
-*/
+
 export function min_ada_required(output, coins_per_utxo_byte) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -368,11 +335,11 @@ export function min_ada_required(output, coins_per_utxo_byte) {
 }
 
 
-/**
+
 * @param {Transaction} tx
 * @param {ExUnitPrices} ex_unit_prices
 * @returns {BigNum}
-*/
+
 export function min_script_fee(tx, ex_unit_prices) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -391,11 +358,11 @@ export function min_script_fee(tx, ex_unit_prices) {
     }
 }
 
-/**
+
 * @param {Transaction} tx
 * @param {LinearFee} linear_fee
 * @returns {BigNum}
-*/
+
 export function min_no_script_fee(tx, linear_fee) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -414,12 +381,12 @@ export function min_no_script_fee(tx, linear_fee) {
     }
 }
 
-/**
+
 * @param {Transaction} tx
 * @param {LinearFee} linear_fee
 * @param {ExUnitPrices} ex_unit_prices
 * @returns {BigNum}
-*/
+
 export function min_fee(tx, linear_fee, ex_unit_prices) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -439,12 +406,12 @@ export function min_fee(tx, linear_fee, ex_unit_prices) {
     }
 }
 
-/**
+
 * @param {TransactionBody} txbody
 * @param {BigNum} pool_deposit
 * @param {BigNum} key_deposit
 * @returns {Value}
-*/
+
 export function get_implicit_input(txbody, pool_deposit, key_deposit) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -464,12 +431,12 @@ export function get_implicit_input(txbody, pool_deposit, key_deposit) {
     }
 }
 
-/**
+
 * @param {TransactionBody} txbody
 * @param {BigNum} pool_deposit
 * @param {BigNum} key_deposit
 * @returns {BigNum}
-*/
+
 export function get_deposit(txbody, pool_deposit, key_deposit) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -489,42 +456,42 @@ export function get_deposit(txbody, pool_deposit, key_deposit) {
     }
 }
 
-/**
+
 * @param {AuxiliaryData} auxiliary_data
 * @returns {AuxiliaryDataHash}
-*/
+
 export function hash_auxiliary_data(auxiliary_data) {
     _assertClass(auxiliary_data, AuxiliaryData);
     const ret = wasm.hash_auxiliary_data(auxiliary_data.ptr);
     return AuxiliaryDataHash.__wrap(ret);
 }
 
-/**
+
 * @param {TransactionBody} tx_body
 * @returns {TransactionHash}
-*/
+
 export function hash_transaction(tx_body) {
     _assertClass(tx_body, TransactionBody);
     const ret = wasm.hash_transaction(tx_body.ptr);
     return TransactionHash.__wrap(ret);
 }
 
-/**
+
 * @param {PlutusData} plutus_data
 * @returns {DataHash}
-*/
+
 export function hash_plutus_data(plutus_data) {
     _assertClass(plutus_data, PlutusData);
     const ret = wasm.hash_plutus_data(plutus_data.ptr);
     return DataHash.__wrap(ret);
 }
 
-/**
+
 * @param {Redeemers} redeemers
 * @param {Costmdls} cost_models
 * @param {PlutusList | undefined} datums
 * @returns {ScriptDataHash}
-*/
+
 export function hash_script_data(redeemers, cost_models, datums) {
     _assertClass(redeemers, Redeemers);
     _assertClass(cost_models, Costmdls);
@@ -538,13 +505,13 @@ export function hash_script_data(redeemers, cost_models, datums) {
     return ScriptDataHash.__wrap(ret);
 }
 
-/**
+
 * @param {Redeemers} redeemers
 * @param {PlutusList} datums
 * @param {Costmdls} cost_models
 * @param {Languages} used_langs
 * @returns {ScriptDataHash | undefined}
-*/
+
 export function calc_script_data_hash(redeemers, datums, cost_models, used_langs) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -565,11 +532,11 @@ export function calc_script_data_hash(redeemers, datums, cost_models, used_langs
     }
 }
 
-/**
+
 * @param {TransactionHash} tx_body_hash
 * @param {PrivateKey} sk
 * @returns {Vkeywitness}
-*/
+
 export function make_vkey_witness(tx_body_hash, sk) {
     _assertClass(tx_body_hash, TransactionHash);
     _assertClass(sk, PrivateKey);
@@ -584,40 +551,40 @@ function handleError(f, args) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
     }
 }
-/**
-*/
+
+
 export const DatumKind = Object.freeze({ Hash:0,"0":"Hash",Inline:1,"1":"Inline", });
-/**
-*/
+
+
 export const CertificateKind = Object.freeze({ StakeRegistration:0,"0":"StakeRegistration",StakeDeregistration:1,"1":"StakeDeregistration",StakeDelegation:2,"2":"StakeDelegation",PoolRegistration:3,"3":"PoolRegistration",PoolRetirement:4,"4":"PoolRetirement",GenesisKeyDelegation:5,"5":"GenesisKeyDelegation",MoveInstantaneousRewardsCert:6,"6":"MoveInstantaneousRewardsCert", });
-/**
-*/
+
+
 export const MIRPot = Object.freeze({ Reserves:0,"0":"Reserves",Treasury:1,"1":"Treasury", });
-/**
-*/
+
+
 export const MIRKind = Object.freeze({ ToOtherPot:0,"0":"ToOtherPot",ToStakeCredentials:1,"1":"ToStakeCredentials", });
-/**
-*/
+
+
 export const RelayKind = Object.freeze({ SingleHostAddr:0,"0":"SingleHostAddr",SingleHostName:1,"1":"SingleHostName",MultiHostName:2,"2":"MultiHostName", });
-/**
-*/
+
+
 export const NativeScriptKind = Object.freeze({ ScriptPubkey:0,"0":"ScriptPubkey",ScriptAll:1,"1":"ScriptAll",ScriptAny:2,"2":"ScriptAny",ScriptNOfK:3,"3":"ScriptNOfK",TimelockStart:4,"4":"TimelockStart",TimelockExpiry:5,"5":"TimelockExpiry", });
-/**
-*/
+
+
 export const NetworkIdKind = Object.freeze({ Testnet:0,"0":"Testnet",Mainnet:1,"1":"Mainnet", });
-/**
-*/
+
+
 export const LanguageKind = Object.freeze({ PlutusV1:0,"0":"PlutusV1",PlutusV2:1,"1":"PlutusV2", });
-/**
-*/
+
+
 export const PlutusDataKind = Object.freeze({ ConstrPlutusData:0,"0":"ConstrPlutusData",Map:1,"1":"Map",List:2,"2":"List",Integer:3,"3":"Integer",Bytes:4,"4":"Bytes", });
-/**
-*/
+
+
 export const RedeemerTagKind = Object.freeze({ Spend:0,"0":"Spend",Mint:1,"1":"Mint",Cert:2,"2":"Cert",Reward:3,"3":"Reward", });
-/**
-*/
+
+
 export const ScriptKind = Object.freeze({ NativeScript:0,"0":"NativeScript",PlutusScriptV1:1,"1":"PlutusScriptV1",PlutusScriptV2:2,"2":"PlutusScriptV2", });
-/**
+
 * JSON <-> PlutusData conversion schemas.
 * Follows ScriptDataJsonSchema in cardano-cli defined at:
 * https://github.com/input-output-hk/cardano-node/blob/master/cardano-api/src/Cardano/Api/ScriptData.hs#L254
@@ -627,9 +594,9 @@ export const ScriptKind = Object.freeze({ NativeScript:0,"0":"NativeScript",Plut
 * * Hex strings for bytes don't accept odd-length (half-byte) strings.
 *      cardano-cli seems to support these however but it seems to be different than just 0-padding
 *      on either side when tested so proceed with caution
-*/
+
 export const PlutusDatumSchema = Object.freeze({
-/**
+
 * ScriptDataJsonNoSchema in cardano-node.
 *
 * This is the format used by --script-data-value in cardano-cli
@@ -641,9 +608,9 @@ export const PlutusDatumSchema = Object.freeze({
 * * ConstrPlutusData not supported in ANY FORM (neither keys nor values)
 * * Lists not supported in keys
 * * Maps not supported in keys
-*/
+
 BasicConversions:0,"0":"BasicConversions",
-/**
+
 * ScriptDataJsonDetailedSchema in cardano-node.
 *
 * This is the format used by --script-data-file in cardano-cli
@@ -666,63 +633,64 @@ BasicConversions:0,"0":"BasicConversions",
 * * the JSON must conform to a very specific schema
 * To JSON:
 * * all Plutus datums should be fully supported outside of the integer range limitations outlined above.
-*/
+
 DetailedSchema:1,"1":"DetailedSchema", });
-/**
-*/
+
+
 export const TransactionMetadatumKind = Object.freeze({ MetadataMap:0,"0":"MetadataMap",MetadataList:1,"1":"MetadataList",Int:2,"2":"Int",Bytes:3,"3":"Bytes",Text:4,"4":"Text", });
-/**
-*/
+
+
 export const MetadataJsonSchema = Object.freeze({ NoConversions:0,"0":"NoConversions",BasicConversions:1,"1":"BasicConversions",DetailedSchema:2,"2":"DetailedSchema", });
-/**
+
 * Used to choose the schema for a script JSON string
-*/
+
 export const ScriptSchema = Object.freeze({ Wallet:0,"0":"Wallet",Node:1,"1":"Node", });
-/**
-*/
+
+
 export const StakeDistributionKind = Object.freeze({ BootstrapEraDistr:0,"0":"BootstrapEraDistr",SingleKeyDistr:1,"1":"SingleKeyDistr", });
-/**
-*/
+
+
 export const AddrtypeKind = Object.freeze({ ATPubKey:0,"0":"ATPubKey",ATScript:1,"1":"ATScript",ATRedeem:2,"2":"ATRedeem", });
-/**
-*/
+
+
 export const SpendingDataKind = Object.freeze({ SpendingDataPubKeyASD:0,"0":"SpendingDataPubKeyASD",SpendingDataScriptASD:1,"1":"SpendingDataScriptASD",SpendingDataRedeemASD:2,"2":"SpendingDataRedeemASD", });
-/**
-*/
+
+
 export const StakeCredKind = Object.freeze({ Key:0,"0":"Key",Script:1,"1":"Script", });
-/**
+
 * Careful: this enum doesn't include the network ID part of the header
 * ex: base address isn't 0b0000_0000 but instead 0b0000
 * Use `header_matches_kind` if you don't want to implement the bitwise operators yourself
-*/
+
 export const AddressHeaderKind = Object.freeze({ BasePaymentKeyStakeKey:0,"0":"BasePaymentKeyStakeKey",BasePaymentScriptStakeKey:1,"1":"BasePaymentScriptStakeKey",BasePaymentKeyStakeScript:2,"2":"BasePaymentKeyStakeScript",BasePaymentScriptStakeScript:3,"3":"BasePaymentScriptStakeScript",PointerKey:4,"4":"PointerKey",PointerScript:5,"5":"PointerScript",EnterpriseKey:6,"6":"EnterpriseKey",EnterpriseScript:7,"7":"EnterpriseScript",Byron:8,"8":"Byron",RewardKey:14,"14":"RewardKey",RewardScript:15,"15":"RewardScript", });
-/**
-*/
+
+
 export const CoinSelectionStrategyCIP2 = Object.freeze({
-/**
+
 * Performs CIP2's Largest First ada-only selection. Will error if outputs contain non-ADA assets.
-*/
+
 LargestFirst:0,"0":"LargestFirst",
-/**
+
 * Performs CIP2's Random Improve ada-only selection. Will error if outputs contain non-ADA assets.
-*/
+
 RandomImprove:1,"1":"RandomImprove",
-/**
+
 * Same as LargestFirst, but before adding ADA, will insert by largest-first for each asset type.
-*/
+
 LargestFirstMultiAsset:2,"2":"LargestFirstMultiAsset",
-/**
+
 * Same as RandomImprove, but before adding ADA, will insert by random-improve for each asset type.
-*/
+
 RandomImproveMultiAsset:3,"3":"RandomImproveMultiAsset", });
-/**
-*/
+
+
 export const ChangeSelectionAlgo = Object.freeze({ Default:0,"0":"Default", });
-/**
+
 * Each new language uses a different namespace for hashing its script
 * This is because you could have a language where the same bytes have different semantics
 * So this avoids scripts in different languages mapping to the same hash
 * Note that the enum value here is different than the enum value for deciding the cost model of a script
 * https://github.com/input-output-hk/cardano-ledger/blob/9c3b4737b13b30f71529e76c5330f403165e28a6/eras/alonzo/impl/src/Cardano/Ledger/Alonzo.hs#L127
-*/
+
 export const ScriptHashNamespace = Object.freeze({ NativeScript:0,"0":"NativeScript",PlutusV1:1,"1":"PlutusV1",PlutusV2:2,"2":"PlutusV2", });
+*/

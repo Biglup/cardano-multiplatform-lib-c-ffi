@@ -1,59 +1,50 @@
-/**
-export class NetworkInfo {
+mod ffi_utils;
 
-    static __wrap(ptr) {
-        const obj = Object.create(NetworkInfo.prototype);
-        obj.ptr = ptr;
+extern crate cardano_multiplatform_lib;
+extern crate libc;
 
-        return obj;
-    }
+use cardano_multiplatform_lib::address::NetworkInfo;
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+#[no_mangle]
+pub extern "C" fn network_info_new(network_id: u8, protocol_magic: u32) -> *mut NetworkInfo {
+    Box::into_raw(Box::new(NetworkInfo::new(network_id, protocol_magic)))
+}
 
-        return ptr;
+#[no_mangle]
+pub extern "C" fn network_info_free(ptr: *mut NetworkInfo) {
+    if ptr.is_null() {
+        return;
     }
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_networkinfo_free(ptr);
-    }
-    /**
-    * @param {number} network_id
-    * @param {number} protocol_magic
-    * @returns {NetworkInfo}
-    */
-    static new(network_id, protocol_magic) {
-        const ret = wasm.networkinfo_new(network_id, protocol_magic);
-        return NetworkInfo.__wrap(ret);
-    }
-    /**
-    * @returns {number}
-    */
-    network_id() {
-        const ret = wasm.networkinfo_network_id(this.ptr);
-        return ret;
-    }
-    /**
-    * @returns {number}
-    */
-    protocol_magic() {
-        const ret = wasm.networkinfo_protocol_magic(this.ptr);
-        return ret >>> 0;
-    }
-    /**
-    * @returns {NetworkInfo}
-    */
-    static testnet() {
-        const ret = wasm.networkinfo_testnet();
-        return NetworkInfo.__wrap(ret);
-    }
-    /**
-    * @returns {NetworkInfo}
-    */
-    static mainnet() {
-        const ret = wasm.networkinfo_mainnet();
-        return NetworkInfo.__wrap(ret);
-    }
+#[no_mangle]
+pub extern "C" fn network_info_network_id(ptr: *mut NetworkInfo) -> u8 {
+    let network_info = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return network_info.network_id();
+}
+
+
+#[no_mangle]
+pub extern "C" fn network_info_protocol_magic(ptr: *mut NetworkInfo) -> u32 {
+    let network_info = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return network_info.protocol_magic();
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_testnet() -> *mut NetworkInfo {
+    Box::into_raw(Box::new(NetworkInfo::testnet()))
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_mainnet() -> *mut NetworkInfo {
+    Box::into_raw(Box::new(NetworkInfo::mainnet()))
 }
