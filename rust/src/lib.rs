@@ -1,11 +1,11 @@
-mod ffi_utils;
+mod utils;
 mod cml;
 
 extern crate cardano_multiplatform_lib;
 extern crate libc;
 
 
-use crate::ffi_utils::Buffer;
+use crate::utils::Buffer;
 
 use cardano_multiplatform_lib::metadata::TransactionMetadatum;
 use cardano_multiplatform_lib::metadata::MetadataJsonSchema;

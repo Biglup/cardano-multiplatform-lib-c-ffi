@@ -1,3 +1,118 @@
+mod utils;
+
+extern crate cardano_multiplatform_lib;
+extern crate libc;
+use crate::utils::Result;
+
+use cardano_multiplatform_lib::builders::tx_builder::TransactionBuilder;
+use cardano_multiplatform_lib::builders::tx_builder::TransactionBuilderConfig;
+use cardano_multiplatform_lib::builders::tx_builder::CoinSelectionStrategyCIP2;
+
+fn coin_selection_strategy_CIP2_from_u32(value: u32) -> MetadataJsonSchema {
+    match value {
+        0 => CoinSelectionStrategyCIP2::LargestFirst,
+        1 => CoinSelectionStrategyCIP2::RandomImprove,
+        2 => CoinSelectionStrategyCIP2::LargestFirstMultiAsset,
+        3 => CoinSelectionStrategyCIP2::RandomImproveMultiAsset,
+        _ => panic!("Unknown CoinSelectionStrategyCIP2 value: {}", value),
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn transaction_builder_new(ptr: *mut TransactionBuilderConfig) -> *mut TransactionBuilder {
+
+    let transaction_builder_config = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    Box::into_raw(Box::new(TransactionBuilder::new(transaction_builder_config)))
+}
+
+
+#[no_mangle]
+pub extern "C" fn transaction_builder_free(ptr: *mut TransactionBuilder) {
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
+
+/// This automatically selects and adds inputs from {inputs} consisting of just enough to cover
+/// the outputs that have already been added.
+/// This should be called after adding all certs/outputs/etc and will be an error otherwise.
+/// Uses CIP2: https://github.com/cardano-foundation/CIPs/blob/master/CIP-0002/CIP-0002.md
+/// Adding a change output must be called after via TransactionBuilder::add_change_if_needed()
+/// This function, diverging from CIP2, takes into account fees and will attempt to add additional
+/// inputs to cover the minimum fees. This does not, however, set the txbuilder's fee.
+#[no_mangle]
+pub extern "C" fn transaction_builder_select_utxos(ptr: *mut TransactionBuilder, strategy: u32) -> Result {
+    let transaction_builder = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    let result = transaction_builder.select_utxos(coin_selection_strategy_CIP2_from_u32(strategy);
+
+    let output = match result {
+        Ok(_) => Result {
+            result: ptr::null(),
+            hasError: false,
+            errorMsg: ptr::null()
+        },
+        Err(jsValue) => Result {
+            result: ptr::null(),
+            hasError: true,
+            errorMsg: get_error_message(jsValue)
+        }
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_new(network_id: u8, protocol_magic: u32) -> *mut NetworkInfo {
+    Box::into_raw(Box::new(NetworkInfo::new(network_id, protocol_magic)))
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_free(ptr: *mut NetworkInfo) {
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_network_id(ptr: *mut NetworkInfo) -> u8 {
+    let network_info = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return network_info.network_id();
+}
+
+
+#[no_mangle]
+pub extern "C" fn network_info_protocol_magic(ptr: *mut NetworkInfo) -> u32 {
+    let network_info = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return network_info.protocol_magic();
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_testnet() -> *mut NetworkInfo {
+    Box::into_raw(Box::new(NetworkInfo::testnet()))
+}
+
+#[no_mangle]
+pub extern "C" fn network_info_mainnet() -> *mut NetworkInfo {
+    Box::into_raw(Box::new(NetworkInfo::mainnet()))
+}
+
 /**
 export class TransactionBuilder {
 
@@ -15,34 +130,7 @@ export class TransactionBuilder {
         return ptr;
     }
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_transactionbuilder_free(ptr);
-    }
-    /**
-    * This automatically selects and adds inputs from {inputs} consisting of just enough to cover
-    * the outputs that have already been added.
-    * This should be called after adding all certs/outputs/etc and will be an error otherwise.
-    * Uses CIP2: https://github.com/cardano-foundation/CIPs/blob/master/CIP-0002/CIP-0002.md
-    * Adding a change output must be called after via TransactionBuilder::add_change_if_needed()
-    * This function, diverging from CIP2, takes into account fees and will attempt to add additional
-    * inputs to cover the minimum fees. This does not, however, set the txbuilder's fee.
-    * @param {number} strategy
-    */
-    select_utxos(strategy) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.transactionbuilder_select_utxos(retptr, this.ptr, strategy);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            if (r1) {
-                throw takeObject(r0);
-            }
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
+       /**
     * @param {InputBuilderResult} result
     */
     add_input(result) {

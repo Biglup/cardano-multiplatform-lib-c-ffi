@@ -9,6 +9,13 @@ pub struct Buffer {
     pub data: *mut u8,
 }
 
+#[repr(C)]
+pub struct Result {
+    pub result: *mut u8,
+    pub hasError: u8,
+    pub errorMsg: *mut c_char
+}
+
 #[no_mangle]
 pub extern "C" fn free_buffer(buf: Buffer) {
     let s = unsafe { std::slice::from_raw_parts_mut(buf.data, buf.len as usize) };
@@ -34,4 +41,20 @@ pub extern "C" fn free_c_str(ptr: *mut c_char) {
 pub unsafe extern "C" fn deallocate_rust_buffer(ptr: *mut i32, len: u32) {
     let len = len as usize;
     drop(Vec::from_raw_parts(ptr, len, len));
+}
+
+pub get_error_message(error: JsError) -> *const c_char {
+    let errorMessage = error.as_string();
+
+    match errorMessage {
+        Some(v) => {
+            let s = CString::new(v).unwrap();
+            let p = s.as_ptr();
+            std::mem::forget(s);
+            return p;
+        },
+        None(_) => {
+            return ptr::null();
+        }
+    };
 }
