@@ -5,7 +5,7 @@ extern crate cardano_multiplatform_lib;
 extern crate libc;
 
 
-use crate::utils::Buffer;
+use crate::utils::CBuffer;
 
 use cardano_multiplatform_lib::metadata::TransactionMetadatum;
 use cardano_multiplatform_lib::metadata::MetadataJsonSchema;
@@ -40,7 +40,7 @@ pub extern "C" fn encode_arbitrary_bytes_as_metadatum(ptr: *mut u8, size: usize)
 
 // decodes from chunks of bytes in a list to a byte vector if that is the metadata format, otherwise returns None
 #[no_mangle]
-pub extern "C" fn decode_arbitrary_bytes_from_metadatum(ptr: *mut TransactionMetadatum) -> Buffer {
+pub extern "C" fn decode_arbitrary_bytes_from_metadatum(ptr: *mut TransactionMetadatum) -> CBuffer {
     let metadata = unsafe {
         assert!(!ptr.is_null());
         &*ptr
@@ -58,7 +58,7 @@ pub extern "C" fn decode_arbitrary_bytes_from_metadatum(ptr: *mut TransactionMet
     let len = buf.len() as i32;
 
     std::mem::forget(buf);
-    Buffer { len, data }
+    CBuffer { len, data }
 }
 
 

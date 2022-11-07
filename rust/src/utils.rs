@@ -5,7 +5,7 @@ use std::ffi::CString;
 use cardano_multiplatform_lib::error::JsError;
 
 #[repr(C)]
-pub struct Buffer {
+pub struct CBuffer {
     pub len: i32,
     pub data: *mut u8,
 }
@@ -18,7 +18,7 @@ pub struct CResult {
 }
 
 #[no_mangle]
-pub extern "C" fn free_buffer(buf: Buffer) {
+pub extern "C" fn free_buffer(buf: CBuffer) {
     let s = unsafe { std::slice::from_raw_parts_mut(buf.data, buf.len as usize) };
     let s = s.as_mut_ptr();
     unsafe {
@@ -59,3 +59,11 @@ pub fn get_error_message(error: JsError) -> *const c_char {
         }
     };
 }
+
+pub fn to_c_str(message: String) -> *const c_char {
+    let s = CString::new(message).unwrap();
+    let p = s.as_ptr();
+    std::mem::forget(s);
+    return p;
+}
+
