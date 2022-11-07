@@ -1,14 +1,13 @@
-mod utils;
-
 extern crate cardano_multiplatform_lib;
 extern crate libc;
-use crate::utils::Result;
+use crate::utils::get_error_message;
+use crate::utils::CResult;
 
 use cardano_multiplatform_lib::builders::tx_builder::TransactionBuilder;
 use cardano_multiplatform_lib::builders::tx_builder::TransactionBuilderConfig;
 use cardano_multiplatform_lib::builders::tx_builder::CoinSelectionStrategyCIP2;
 
-fn coin_selection_strategy_CIP2_from_u32(value: u32) -> MetadataJsonSchema {
+fn coin_selection_strategy_cip2_from_u32(value: u32) -> CoinSelectionStrategyCIP2 {
     match value {
         0 => CoinSelectionStrategyCIP2::LargestFirst,
         1 => CoinSelectionStrategyCIP2::RandomImprove,
@@ -48,27 +47,29 @@ pub extern "C" fn transaction_builder_free(ptr: *mut TransactionBuilder) {
 /// This function, diverging from CIP2, takes into account fees and will attempt to add additional
 /// inputs to cover the minimum fees. This does not, however, set the txbuilder's fee.
 #[no_mangle]
-pub extern "C" fn transaction_builder_select_utxos(ptr: *mut TransactionBuilder, strategy: u32) -> Result {
+pub extern "C" fn transaction_builder_select_utxos(ptr: *mut TransactionBuilder, strategy: u32) -> CResult {
     let transaction_builder = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
-    let result = transaction_builder.select_utxos(coin_selection_strategy_CIP2_from_u32(strategy);
+    let result = transaction_builder.select_utxos(coin_selection_strategy_cip2_from_u32(strategy));
 
     let output = match result {
-        Ok(_) => Result {
-            result: ptr::null(),
-            hasError: false,
-            errorMsg: ptr::null()
+        Ok(_) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
         },
-        Err(jsValue) => Result {
-            result: ptr::null(),
-            hasError: true,
-            errorMsg: get_error_message(jsValue)
+        Err(js_value) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
     };
-}
 
+    return output;
+}
+/* 
 #[no_mangle]
 pub extern "C" fn network_info_new(network_id: u8, protocol_magic: u32) -> *mut NetworkInfo {
     Box::into_raw(Box::new(NetworkInfo::new(network_id, protocol_magic)))
@@ -111,9 +112,9 @@ pub extern "C" fn network_info_testnet() -> *mut NetworkInfo {
 #[no_mangle]
 pub extern "C" fn network_info_mainnet() -> *mut NetworkInfo {
     Box::into_raw(Box::new(NetworkInfo::mainnet()))
-}
+} */
 
-/**
+/* *
 export class TransactionBuilder {
 
     static __wrap(ptr) {
@@ -130,9 +131,7 @@ export class TransactionBuilder {
         return ptr;
     }
 
-       /**
     * @param {InputBuilderResult} result
-    */
     add_input(result) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -147,18 +146,14 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
     * @param {InputBuilderResult} result
-    */
     add_utxo(result) {
         _assertClass(result, InputBuilderResult);
         wasm.transactionbuilder_add_utxo(this.ptr, result.ptr);
     }
-    /**
     * calculates how much the fee would increase if you added a given output
     * @param {InputBuilderResult} result
     * @returns {BigNum}
-    */
     fee_for_input(result) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -175,17 +170,13 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
     * @param {TransactionUnspentOutput} utxo
-    */
     add_reference_input(utxo) {
         _assertClass(utxo, TransactionUnspentOutput);
         wasm.transactionbuilder_add_reference_input(this.ptr, utxo.ptr);
     }
-    /**
     * Add explicit output via a TransactionOutput object
     * @param {SingleOutputBuilderResult} builder_result
-    */
     add_output(builder_result) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -200,11 +191,9 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
     * calculates how much the fee would increase if you added a given output
     * @param {SingleOutputBuilderResult} builder
     * @returns {BigNum}
-    */
     fee_for_output(builder) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -221,103 +210,75 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
     * @param {BigNum} fee
-    */
     set_fee(fee) {
         _assertClass(fee, BigNum);
         wasm.transactionbuilder_set_fee(this.ptr, fee.ptr);
     }
-    /**
     * @param {BigNum} ttl
-    */
     set_ttl(ttl) {
         _assertClass(ttl, BigNum);
         wasm.transactionbuilder_set_ttl(this.ptr, ttl.ptr);
     }
-    /**
     * @param {BigNum} validity_start_interval
-    */
     set_validity_start_interval(validity_start_interval) {
         _assertClass(validity_start_interval, BigNum);
         wasm.transactionbuilder_set_validity_start_interval(this.ptr, validity_start_interval.ptr);
     }
-    /**
     * @returns {Certificates | undefined}
-    */
     get_certs() {
         const ret = wasm.transactionbuilder_get_certs(this.ptr);
         return ret === 0 ? undefined : Certificates.__wrap(ret);
     }
-    /**
     * @param {CertificateBuilderResult} result
-    */
     add_cert(result) {
         _assertClass(result, CertificateBuilderResult);
         wasm.transactionbuilder_add_cert(this.ptr, result.ptr);
     }
-    /**
     * @returns {Withdrawals | undefined}
-    */
     get_withdrawals() {
         const ret = wasm.transactionbuilder_get_withdrawals(this.ptr);
         return ret === 0 ? undefined : Withdrawals.__wrap(ret);
     }
-    /**
     * @param {WithdrawalBuilderResult} result
-    */
     add_withdrawal(result) {
         _assertClass(result, WithdrawalBuilderResult);
         wasm.transactionbuilder_add_withdrawal(this.ptr, result.ptr);
     }
-    /**
     * @returns {AuxiliaryData | undefined}
-    */
     get_auxiliary_data() {
         const ret = wasm.transactionbuilder_get_auxiliary_data(this.ptr);
         return ret === 0 ? undefined : AuxiliaryData.__wrap(ret);
     }
-    /**
     * @param {AuxiliaryData} new_aux_data
-    */
     set_auxiliary_data(new_aux_data) {
         _assertClass(new_aux_data, AuxiliaryData);
         wasm.transactionbuilder_set_auxiliary_data(this.ptr, new_aux_data.ptr);
     }
-    /**
     * @param {AuxiliaryData} new_aux_data
-    */
     add_auxiliary_data(new_aux_data) {
         _assertClass(new_aux_data, AuxiliaryData);
         wasm.transactionbuilder_add_auxiliary_data(this.ptr, new_aux_data.ptr);
     }
-    /**
     * @param {MintBuilderResult} result
-    */
     add_mint(result) {
         _assertClass(result, MintBuilderResult);
         wasm.transactionbuilder_add_mint(this.ptr, result.ptr);
     }
-    /**
     * Returns a copy of the current mint state in the builder
     * @returns {Mint | undefined}
-    */
     get_mint() {
         const ret = wasm.transactionbuilder_get_mint(this.ptr);
         return ret === 0 ? undefined : Mint.__wrap(ret);
     }
-    /**
     * @param {TransactionBuilderConfig} cfg
     * @returns {TransactionBuilder}
-    */
     static new(cfg) {
         _assertClass(cfg, TransactionBuilderConfig);
         const ret = wasm.transactionbuilder_new(cfg.ptr);
         return TransactionBuilder.__wrap(ret);
     }
-    /**
     * @param {InputBuilderResult} result
-    */
     add_collateral(result) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -332,47 +293,47 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * @returns {TransactionInputs | undefined}
-    */
+    
     collateral() {
         const ret = wasm.transactionbuilder_collateral(this.ptr);
         return ret === 0 ? undefined : TransactionInputs.__wrap(ret);
     }
-    /**
+   
     * @param {Ed25519KeyHash} hash
-    */
+    
     add_required_signer(hash) {
         _assertClass(hash, Ed25519KeyHash);
         wasm.transactionbuilder_add_required_signer(this.ptr, hash.ptr);
     }
-    /**
+   
     * @returns {Ed25519KeyHashes | undefined}
-    */
+    
     required_signers() {
         const ret = wasm.transactionbuilder_required_signers(this.ptr);
         return ret === 0 ? undefined : Ed25519KeyHashes.__wrap(ret);
     }
-    /**
+   
     * @param {NetworkId} network_id
-    */
+    
     set_network_id(network_id) {
         _assertClass(network_id, NetworkId);
         var ptr0 = network_id.ptr;
         network_id.ptr = 0;
         wasm.transactionbuilder_set_network_id(this.ptr, ptr0);
     }
-    /**
+   
     * @returns {NetworkId | undefined}
-    */
+    
     network_id() {
         const ret = wasm.transactionbuilder_network_id(this.ptr);
         return ret === 0 ? undefined : NetworkId.__wrap(ret);
     }
-    /**
+   
     * does not include refunds or withdrawals
     * @returns {Value}
-    */
+    
     get_explicit_input() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -388,10 +349,10 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * withdrawals and refunds
     * @returns {Value}
-    */
+    
     get_implicit_input() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -407,10 +368,10 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * Return explicit input plus implicit input plus mint
     * @returns {Value}
-    */
+    
     get_total_input() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -426,10 +387,10 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * Return explicit output plus implicit output plus burn (does not consider fee directly)
     * @returns {Value}
-    */
+    
     get_total_output() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -445,10 +406,10 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * does not include fee
     * @returns {Value}
-    */
+    
     get_explicit_output() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -464,9 +425,9 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * @returns {BigNum}
-    */
+    
     get_deposit() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -482,23 +443,23 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * @returns {BigNum | undefined}
-    */
+    
     get_fee_if_set() {
         const ret = wasm.transactionbuilder_get_fee_if_set(this.ptr);
         return ret === 0 ? undefined : BigNum.__wrap(ret);
     }
-    /**
+   
     * @param {TransactionOutput} output
-    */
+    
     set_collateral_return(output) {
         _assertClass(output, TransactionOutput);
         wasm.transactionbuilder_set_collateral_return(this.ptr, output.ptr);
     }
-    /**
+   
     * @returns {number}
-    */
+    
     full_size() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -514,9 +475,9 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * @returns {Uint32Array}
-    */
+    
     output_sizes() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -530,14 +491,14 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * Builds the transaction and moves to the next step redeemer units can be added and a draft tx can
     * be evaluated
     * NOTE: is_valid set to true
     * @param {number} algo
     * @param {Address} change_address
     * @returns {TxRedeemerBuilder}
-    */
+    
     build_for_evaluation(algo, change_address) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -554,13 +515,13 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * Builds the transaction and moves to the next step where any real witness can be added
     * NOTE: is_valid set to true
     * @param {number} algo
     * @param {Address} change_address
     * @returns {SignedTxBuilder}
-    */
+    
     build(algo, change_address) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -577,23 +538,23 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-    /**
+   
     * used to override the exunit values initially provided when adding inputs
     * @param {RedeemerWitnessKey} redeemer
     * @param {ExUnits} ex_units
-    */
+    
     set_exunits(redeemer, ex_units) {
         _assertClass(redeemer, RedeemerWitnessKey);
         _assertClass(ex_units, ExUnits);
         wasm.transactionbuilder_set_exunits(this.ptr, redeemer.ptr, ex_units.ptr);
     }
-    /**
+   
     * warning: sum of all parts of a transaction must equal 0. You cannot just set the fee to the min value and forget about it
     * warning: min_fee may be slightly larger than the actual minimum fee (ex: a few lovelaces)
     * this is done to simplify the library code, but can be fixed later
     * @param {boolean} script_calulation
     * @returns {BigNum}
-    */
+    
     min_fee(script_calulation) {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -609,4 +570,4 @@ export class TransactionBuilder {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
-}
+}*/

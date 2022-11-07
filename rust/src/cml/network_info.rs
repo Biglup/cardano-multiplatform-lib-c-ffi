@@ -1,5 +1,3 @@
-mod utils;
-
 extern crate cardano_multiplatform_lib;
 extern crate libc;
 

@@ -2,6 +2,7 @@ extern crate libc;
 
 use libc::c_char;
 use std::ffi::CString;
+use cardano_multiplatform_lib::error::JsError;
 
 #[repr(C)]
 pub struct Buffer {
@@ -10,10 +11,10 @@ pub struct Buffer {
 }
 
 #[repr(C)]
-pub struct Result {
+pub struct CResult {
     pub result: *mut u8,
-    pub hasError: u8,
-    pub errorMsg: *mut c_char
+    pub has_error: u8,
+    pub error_msg: *const c_char
 }
 
 #[no_mangle]
@@ -43,18 +44,18 @@ pub unsafe extern "C" fn deallocate_rust_buffer(ptr: *mut i32, len: u32) {
     drop(Vec::from_raw_parts(ptr, len, len));
 }
 
-pub get_error_message(error: JsError) -> *const c_char {
-    let errorMessage = error.as_string();
+pub fn get_error_message(error: JsError) -> *const c_char {
+    let error_message = error.as_string();
 
-    match errorMessage {
+    match error_message {
         Some(v) => {
             let s = CString::new(v).unwrap();
             let p = s.as_ptr();
             std::mem::forget(s);
             return p;
         },
-        None(_) => {
-            return ptr::null();
+        None => {
+            return std::ptr::null_mut();
         }
     };
 }

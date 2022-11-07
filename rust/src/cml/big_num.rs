@@ -1,228 +1,282 @@
-/**
-export class BigNum {
 
-    static __wrap(ptr) {
-        const obj = Object.create(BigNum.prototype);
-        obj.ptr = ptr;
+mod utils;
 
-        return obj;
+extern crate cardano_multiplatform_lib;
+extern crate libc;
+
+use cardano_multiplatform_lib::ledger::common::value::BigNum;
+use crate::utils::CResult;
+use crate::utils::CBuffer;sdasd
+
+#[no_mangle]
+pub extern "C" fn big_num_free(ptr: *mut BigNum) {
+    assert!(!ptr.is_null());
+
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_to_bytes(ptr: *mut BigNum) -> CBuffer {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let     result = big_num.to_bytes();
+    let mut buf    = result.into_boxed_slice();
+    let     data   = buf.as_mut_ptr();
+    let     len    = buf.len() as i32;
+
+    std::mem::forget(buf);
+    Buffer { len, data }
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_from_bytes(ptr: *mut u8, size: usize) -> CResult  {
+    assert!(!ptr.is_null());
+    assert!(size >= 0);
+
+    unsafe {
+        let v = slice::from_raw_parts(ptr, size as usize).to_vec();
+        return Box::into_raw(Box::new(BigNum::from_bytes(v)));
     }
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+    match BigNum::from_bytes(v) {
+        Ok(bigNum) => CResult {
+            result:    Box::into_raw(Box::new(bigNum)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(message) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: message.to_string()
+        }
+}
 
-        return ptr;
-    }
+#[no_mangle]
+pub extern "C" fn big_num_from_string(big_num_str: *const c_char) -> CResult {
+    assert!(!big_num_str.is_null());
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_bignum_free(ptr);
-    }
-    /**
-    * @returns {Uint8Array}
-    */
-    to_bytes() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.bignum_to_bytes(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v0 = getArrayU8FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 1);
-            return v0;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    let c_str:     &CStr  = unsafe { CStr::from_ptr(big_num_str) };
+    let str_slice: &str   = c_str.to_str().unwrap();
+    let str_buf:   String = str_slice.to_owned(); 
+   
+    let result = BigNum::from_str(str_buf);
+
+    match result {
+        Ok(v) => CResult {
+            result:    Box::into_raw(Box::new(v)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(jsValue) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(jsValue)
         }
-    }
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {BigNum}
-    */
-    static from_bytes(bytes) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.bignum_from_bytes(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_to_string(ptr: *mut BigNum) -> *const c_char {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = big_num.to_str();
+
+    let s = CString::new(result).unwrap();
+    let p = s.as_ptr();
+    std::mem::forget(s);
+    return p;
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_zero() -> *mut BigNum  {
+    Box::into_raw(Box::new(BigNum::zero()))
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_is_zero(ptr: *mut BigNum) -> boolean  {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    big_num.is_zero();
+}
+
+
+#[no_mangle]
+pub extern "C" fn big_num_checked_mul(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    let result = big_num.checked_mul(other_big_num);
+
+    match result {
+        Ok(v) => CResult {
+            result: Box::into_raw(Box::new(v)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(jsValue) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(jsValue)
         }
-    }
-    /**
-    * @param {string} string
-    * @returns {BigNum}
-    */
-    static from_str(string) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(string, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.bignum_from_str(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_checked_add(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    let result = big_num.checked_add(other_big_num);
+
+    match result {
+        Ok(v) => CResult {
+            result: Box::into_raw(Box::new(v)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(jsValue) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(jsValue)
         }
-    }
-    /**
-    * @returns {string}
-    */
-    to_str() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.bignum_to_str(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            return getStringFromWasm0(r0, r1);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(r0, r1);
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_checked_sub(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    let result = big_num.checked_sub(other_big_num);
+
+    match result {
+        Ok(v) => CResult {
+            result: Box::into_raw(Box::new(v)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(jsValue) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(jsValue)
         }
-    }
-    /**
-    * @returns {BigNum}
-    */
-    static zero() {
-        const ret = wasm.bignum_zero();
-        return BigNum.__wrap(ret);
-    }
-    /**
-    * @returns {boolean}
-    */
-    is_zero() {
-        const ret = wasm.bignum_is_zero(this.ptr);
-        return ret !== 0;
-    }
-    /**
-    * @param {BigNum} other
-    * @returns {BigNum}
-    */
-    checked_mul(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(other, BigNum);
-            wasm.bignum_checked_mul(retptr, this.ptr, other.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_clamped_sub(ptr: *mut BigNum, other: *mut BigNum) -> *mut BigNum {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    Box::into_raw(Box::new(big_num.clamped_sub(other_big_num)))
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_checked_div(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    let result = big_num.checked_div(other_big_num);
+
+    match result {
+        Ok(v) => CResult {
+            result: Box::into_raw(Box::new(v)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(jsValue) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(jsValue)
         }
-    }
-    /**
-    * @param {BigNum} other
-    * @returns {BigNum}
-    */
-    checked_add(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(other, BigNum);
-            wasm.bignum_checked_add(retptr, this.ptr, other.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_checked_div_ceil(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    let result = big_num.checked_div_ceil(other_big_num);
+
+    match result {
+        Ok(v) => CResult {
+            result: Box::into_raw(Box::new(v)),
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(jsValue) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(jsValue)
         }
-    }
-    /**
-    * @param {BigNum} other
-    * @returns {BigNum}
-    */
-    checked_sub(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(other, BigNum);
-            wasm.bignum_checked_sub(retptr, this.ptr, other.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * returns 0 if it would otherwise underflow
-    * @param {BigNum} other
-    * @returns {BigNum}
-    */
-    clamped_sub(other) {
-        _assertClass(other, BigNum);
-        const ret = wasm.bignum_clamped_sub(this.ptr, other.ptr);
-        return BigNum.__wrap(ret);
-    }
-    /**
-    * @param {BigNum} other
-    * @returns {BigNum}
-    */
-    checked_div(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(other, BigNum);
-            wasm.bignum_checked_div(retptr, this.ptr, other.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @param {BigNum} other
-    * @returns {BigNum}
-    */
-    checked_div_ceil(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(other, BigNum);
-            wasm.bignum_checked_div_ceil(retptr, this.ptr, other.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return BigNum.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @param {BigNum} rhs_value
-    * @returns {number}
-    */
-    compare(rhs_value) {
-        _assertClass(rhs_value, BigNum);
-        const ret = wasm.bignum_compare(this.ptr, rhs_value.ptr);
-        return ret;
-    }
+    };
+}
+
+#[no_mangle]
+pub extern "C" fn big_num_compare(ptr: *mut BigNum, other: *mut BigNum) -> i8 {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let other_big_num = unsafe {
+        assert!(!other.is_null());
+        &mut* other
+    };
+
+    big_num.compare(other_big_num);
 }
