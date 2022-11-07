@@ -1,3 +1,4 @@
+use ledger::common::value::Int;
 /**
 export class Int {
 

@@ -27,7 +27,6 @@ pub extern "C" fn network_info_network_id(ptr: *mut NetworkInfo) -> u8 {
     return network_info.network_id();
 }
 
-
 #[no_mangle]
 pub extern "C" fn network_info_protocol_magic(ptr: *mut NetworkInfo) -> u32 {
     let network_info = unsafe {

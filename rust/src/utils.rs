@@ -4,13 +4,43 @@ use libc::c_char;
 use std::ffi::CString;
 use cardano_multiplatform_lib::error::JsError;
 
-#[repr(C)]
 pub struct CBuffer {
     pub len: i32,
     pub data: *mut u8,
 }
 
-#[repr(C)]
+#[no_mangle]
+pub extern "C" fn buffer_free(ptr: *mut CBuffer) {
+    assert!(!ptr.is_null());
+
+    let s = unsafe { std::slice::from_raw_parts_mut((*ptr).data, (*ptr).len as usize) };
+    let s = s.as_mut_ptr();
+
+    unsafe {
+        Box::from_raw(s);
+        Box::from_raw(ptr);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn buffer_get_len(ptr: *mut CBuffer) -> i32 {
+    let buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return buffer.len;
+}
+
+
+#[no_mangle]
+pub extern "C" fn buffer_get_data(ptr: *mut CBuffer) -> *mut u8 {
+    let buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return buffer.data;
+}
+
 pub struct CResult {
     pub result: *mut u8,
     pub has_error: u8,
@@ -18,12 +48,40 @@ pub struct CResult {
 }
 
 #[no_mangle]
-pub extern "C" fn free_buffer(buf: CBuffer) {
-    let s = unsafe { std::slice::from_raw_parts_mut(buf.data, buf.len as usize) };
-    let s = s.as_mut_ptr();
+pub extern "C" fn result_free(ptr: *mut CResult) {
+    assert!(!ptr.is_null());
+
     unsafe {
-        Box::from_raw(s);
+        Box::from_raw(ptr);
     }
+}
+
+#[no_mangle]
+pub extern "C" fn result_get(ptr: *mut CResult) -> *mut u8 {
+    let res = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return res.result;
+}
+
+#[no_mangle]
+pub extern "C" fn result_get_has_error(ptr: *mut CResult) -> u8 {
+    let res = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return res.has_error;
+}
+
+
+#[no_mangle]
+pub extern "C" fn result_get_error_message(ptr: *mut CResult) -> *const c_char {
+    let res = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return res.error_msg;
 }
 
 #[no_mangle]

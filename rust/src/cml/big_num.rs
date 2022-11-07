@@ -22,7 +22,7 @@ pub extern "C" fn big_num_free(ptr: *mut BigNum) {
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_to_bytes(ptr: *mut BigNum) -> CBuffer {
+pub extern "C" fn big_num_to_bytes(ptr: *mut BigNum) -> *mut CBuffer {
     let big_num = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
@@ -34,11 +34,12 @@ pub extern "C" fn big_num_to_bytes(ptr: *mut BigNum) -> CBuffer {
     let     len    = buf.len() as i32;
 
     std::mem::forget(buf);
-    CBuffer { len, data }
+
+    return Box::into_raw(Box::new(CBuffer { len, data }));
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_from_bytes(ptr: *mut u8, size: usize) -> CResult  {
+pub extern "C" fn big_num_from_bytes(ptr: *mut u8, size: usize) -> *mut CResult  {
     assert!(!ptr.is_null());
     assert!(size > 0);
 
@@ -57,11 +58,11 @@ pub extern "C" fn big_num_from_bytes(ptr: *mut u8, size: usize) -> CResult  {
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_from_string(big_num_str: *const c_char) -> CResult {
+pub extern "C" fn big_num_from_string(big_num_str: *const c_char) -> *mut CResult {
     assert!(!big_num_str.is_null());
 
     let data_c_str: &CStr = unsafe { CStr::from_ptr(big_num_str) };
@@ -82,7 +83,7 @@ pub extern "C" fn big_num_from_string(big_num_str: *const c_char) -> CResult {
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
@@ -115,9 +116,8 @@ pub extern "C" fn big_num_is_zero(ptr: *mut BigNum) -> u8  {
     return unsafe{ mem::transmute(big_num.is_zero()) };
 }
 
-
 #[no_mangle]
-pub extern "C" fn big_num_checked_mul(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+pub extern "C" fn big_num_checked_mul(ptr: *mut BigNum, other: *mut BigNum) -> *mut CResult {
     let big_num = unsafe {
         assert!(!ptr.is_null());
         &mut* ptr
@@ -143,11 +143,11 @@ pub extern "C" fn big_num_checked_mul(ptr: *mut BigNum, other: *mut BigNum) -> C
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_checked_add(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+pub extern "C" fn big_num_checked_add(ptr: *mut BigNum, other: *mut BigNum) -> *mut CResult {
     let big_num = unsafe {
         assert!(!ptr.is_null());
         &mut* ptr
@@ -173,11 +173,11 @@ pub extern "C" fn big_num_checked_add(ptr: *mut BigNum, other: *mut BigNum) -> C
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_checked_sub(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+pub extern "C" fn big_num_checked_sub(ptr: *mut BigNum, other: *mut BigNum) -> *mut CResult {
     let big_num = unsafe {
         assert!(!ptr.is_null());
         &mut* ptr
@@ -203,7 +203,7 @@ pub extern "C" fn big_num_checked_sub(ptr: *mut BigNum, other: *mut BigNum) -> C
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
@@ -222,7 +222,7 @@ pub extern "C" fn big_num_clamped_sub(ptr: *mut BigNum, other: *mut BigNum) -> *
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_checked_div(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+pub extern "C" fn big_num_checked_div(ptr: *mut BigNum, other: *mut BigNum) -> *mut CResult {
     let big_num = unsafe {
         assert!(!ptr.is_null());
         &mut* ptr
@@ -248,11 +248,11 @@ pub extern "C" fn big_num_checked_div(ptr: *mut BigNum, other: *mut BigNum) -> C
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
-pub extern "C" fn big_num_checked_div_ceil(ptr: *mut BigNum, other: *mut BigNum) -> CResult {
+pub extern "C" fn big_num_checked_div_ceil(ptr: *mut BigNum, other: *mut BigNum) -> *mut CResult {
     let big_num = unsafe {
         assert!(!ptr.is_null());
         &mut* ptr
@@ -278,7 +278,7 @@ pub extern "C" fn big_num_checked_div_ceil(ptr: *mut BigNum, other: *mut BigNum)
         }
     };
 
-    return ret;
+    return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
