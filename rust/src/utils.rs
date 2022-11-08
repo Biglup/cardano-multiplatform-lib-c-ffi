@@ -84,6 +84,38 @@ pub extern "C" fn result_get_error_message(ptr: *mut CResult) -> *const c_char {
     return res.error_msg;
 }
 
+pub struct COption {
+    pub some: *mut u8,
+    pub is_none: u8,
+}
+
+#[no_mangle]
+pub extern "C" fn option_free(ptr: *mut COption) {
+    assert!(!ptr.is_null());
+
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn option_get_is_none(ptr: *mut COption) -> u8 {
+    let res = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return res.is_none;
+}
+
+#[no_mangle]
+pub extern "C" fn option_get_some(ptr: *mut COption) -> *mut u8 {
+    let res = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return res.some;
+}
+
 #[no_mangle]
 pub extern "C" fn free_c_str(ptr: *mut c_char) {
     if ptr.is_null() {
@@ -91,6 +123,15 @@ pub extern "C" fn free_c_str(ptr: *mut c_char) {
     }
     unsafe {
         drop(CString::from_raw(ptr));
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn free_int32(ptr: *mut i32) {
+    assert!(!ptr.is_null());
+
+    unsafe {
+        Box::from_raw(ptr);
     }
 }
 

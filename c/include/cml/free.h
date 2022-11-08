@@ -1,5 +1,5 @@
 /**
- * @file cardano_multiplatform_lib.h
+ * @file free.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,31 +17,23 @@
  * limitations under the License.
  */
 
-#ifndef CML_CARDANO_MULTIPLATFORM_LIB_H_
-#define CML_CARDANO_MULTIPLATFORM_LIB_H_
+#ifndef CML_FREE_H_
+#define CML_FREE_H_
 
-/* INCLUDES ******************************************************************/
+/* PROTOTYPES ***************************************************************/
 
-extern "C"
-{
+/**
+ * Frees a C string allocated in the Rust side of the FFI. 
+ */
+void free_c_str(const char* str);
 
-#include <cml/big_num.h>
-#include <cml/buffer.h>
-#include <cml/coin_selection_strategy.h>
-#include <cml/encrypt.h>
-#include <cml/free.h>
-#include <cml/int.h>
-#include <cml/metadata_json_schema.h>
-#include <cml/network_info.h>
-#include <cml/option.h>
-#include <cml/plutus_data.h>
-#include <cml/plutus_datum_schema.h>
-#include <cml/result.h>
-#include <cml/transaction_metadatum.h>
+/**
+ * Frees a i32 allocated in the Rust side of the FFI. 
+ */
+void free_int32(const void* i32);
 
-}
+#endif /* CML_FREE_H_ */
 
-#endif /* CML_CARDANO_MULTIPLATFORM_LIB_H_ */
 
 
 

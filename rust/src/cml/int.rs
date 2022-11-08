@@ -1,210 +1,238 @@
-use ledger::common::value::Int;
-/**
-export class Int {
+extern crate cardano_multiplatform_lib;
+extern crate libc;
+use libc::c_char;
+use std::ffi::CString;
+use std::ffi::CStr;
+use std::mem;
 
-    static __wrap(ptr) {
-        const obj = Object.create(Int.prototype);
-        obj.ptr = ptr;
+use cardano_multiplatform_lib::ledger::common::value::Int;
+use cardano_multiplatform_lib::ledger::common::value::BigNum;
+use crate::utils::CResult;
+use crate::utils::CBuffer;
+use crate::utils::COption;
+use crate::utils::get_error_message;
+use crate::utils::to_c_str;
 
-        return obj;
-    }
+#[no_mangle]
+pub extern "C" fn int_new(ptr: *mut BigNum) -> *mut Int {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+    Box::into_raw(Box::new(Int::new(big_num)))
+}
 
-        return ptr;
-    }
+#[no_mangle]
+pub extern "C" fn int_new_negative(ptr: *mut BigNum) -> *mut Int {
+    let big_num = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_int_free(ptr);
+    Box::into_raw(Box::new(Int::new_negative(big_num)))
+}
+
+#[no_mangle]
+pub extern "C" fn int_new_i32(x: i32) -> *mut Int {
+    Box::into_raw(Box::new(Int::from(x)))
+}
+
+#[no_mangle]
+pub extern "C" fn int_free(ptr: *mut Int) {
+    assert!(!ptr.is_null());
+
+    unsafe {
+        Box::from_raw(ptr);
     }
-    /**
-    * @returns {Uint8Array}
-    */
-    to_bytes() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.int_to_bytes(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v0 = getArrayU8FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 1);
-            return v0;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+}
+
+#[no_mangle]
+pub extern "C" fn int_as_positive(ptr: *mut Int) -> *mut COption {
+    assert!(!ptr.is_null());
+
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = int.as_positive();
+
+    let ret = match result {
+        Some(v) => COption {
+            some:    Box::into_raw(Box::new(v)) as *mut u8,
+            is_none: 0
+        },
+        None => COption {
+            some:    std::ptr::null_mut(),
+            is_none: 1,
         }
-    }
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {Int}
-    */
-    static from_bytes(bytes) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.int_from_bytes(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return Int.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn int_as_negative(ptr: *mut Int) -> *mut COption {
+    assert!(!ptr.is_null());
+
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = int.as_negative();
+
+    let ret = match result {
+        Some(v) => COption {
+            some:    Box::into_raw(Box::new(v)) as *mut u8,
+            is_none: 0
+        },
+        None => COption {
+            some:    std::ptr::null_mut(),
+            is_none: 1,
         }
-    }
-    /**
-    * @param {BigNum} x
-    * @returns {Int}
-    */
-    static new(x) {
-        _assertClass(x, BigNum);
-        const ret = wasm.int_new(x.ptr);
-        return Int.__wrap(ret);
-    }
-    /**
-    * @param {BigNum} x
-    * @returns {Int}
-    */
-    static new_negative(x) {
-        _assertClass(x, BigNum);
-        const ret = wasm.int_new_negative(x.ptr);
-        return Int.__wrap(ret);
-    }
-    /**
-    * @param {number} x
-    * @returns {Int}
-    */
-    static new_i32(x) {
-        const ret = wasm.int_new_i32(x);
-        return Int.__wrap(ret);
-    }
-    /**
-    * @returns {boolean}
-    */
-    is_positive() {
-        const ret = wasm.int_is_positive(this.ptr);
-        return ret !== 0;
-    }
-    /**
-    * BigNum can only contain unsigned u64 values
-    *
-    * This function will return the BigNum representation
-    * only in case the underlying i128 value is positive.
-    *
-    * Otherwise nothing will be returned (undefined).
-    * @returns {BigNum | undefined}
-    */
-    as_positive() {
-        const ret = wasm.int_as_positive(this.ptr);
-        return ret === 0 ? undefined : BigNum.__wrap(ret);
-    }
-    /**
-    * BigNum can only contain unsigned u64 values
-    *
-    * This function will return the *absolute* BigNum representation
-    * only in case the underlying i128 value is negative.
-    *
-    * Otherwise nothing will be returned (undefined).
-    * @returns {BigNum | undefined}
-    */
-    as_negative() {
-        const ret = wasm.int_as_negative(this.ptr);
-        return ret === 0 ? undefined : BigNum.__wrap(ret);
-    }
-    /**
-    * !!! DEPRECATED !!!
-    * Returns an i32 value in case the underlying original i128 value is within the limits.
-    * Otherwise will just return an empty value (undefined).
-    * @returns {number | undefined}
-    */
-    as_i32() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.int_as_i32(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            return r0 === 0 ? undefined : r1;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn int_is_positive(ptr: *mut Int) -> u8  {
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    return unsafe{ mem::transmute(int.is_positive()) };
+}
+
+#[no_mangle]
+pub extern "C" fn int_as_i32_or_nothing(ptr: *mut Int) -> *mut COption {
+    assert!(!ptr.is_null());
+
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = int.as_i32_or_nothing();
+
+    let ret = match result {
+        Some(v) => COption {
+            some:    Box::into_raw(Box::new(v)) as *mut u8,
+            is_none: 0
+        },
+        None => COption {
+            some:    std::ptr::null_mut(),
+            is_none: 1,
         }
-    }
-    /**
-    * Returns the underlying value converted to i32 if possible (within limits)
-    * Otherwise will just return an empty value (undefined).
-    * @returns {number | undefined}
-    */
-    as_i32_or_nothing() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.int_as_i32_or_nothing(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            return r0 === 0 ? undefined : r1;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn int_as_i32_or_fail(ptr: *mut Int) -> *mut CResult {
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = int.as_i32_or_fail();
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result: Box::into_raw(Box::new(v)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result: std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
-    }
-    /**
-    * Returns the underlying value converted to i32 if possible (within limits)
-    * JsError in case of out of boundary overflow
-    * @returns {number}
-    */
-    as_i32_or_fail() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.int_as_i32_or_fail(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return r0;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn int_to_bytes(ptr: *mut Int) -> *mut CBuffer {
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let     result = int.to_bytes();
+    let mut buf    = result.into_boxed_slice();
+    let     data   = buf.as_mut_ptr();
+    let     len    = buf.len() as i32;
+
+    std::mem::forget(buf);
+
+    return Box::into_raw(Box::new(CBuffer { len, data }));
+}
+
+#[no_mangle]
+pub extern "C" fn int_from_bytes(ptr: *mut u8, size: usize) -> *mut CResult  {
+    assert!(!ptr.is_null());
+    assert!(size > 0);
+
+    let v = unsafe { core::slice::from_raw_parts(ptr, size as usize).to_vec() };
+
+    let ret = match Int::from_bytes(v) {
+        Ok(int) => CResult {
+            result:    Box::into_raw(Box::new(int)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(message) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: to_c_str(message.to_string())
         }
-    }
-    /**
-    * Returns string representation of the underlying i128 value directly.
-    * Might contain the minus sign (-) in case of negative value.
-    * @returns {string}
-    */
-    to_str() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.int_to_str(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            return getStringFromWasm0(r0, r1);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(r0, r1);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn int_from_string(int_str: *const c_char) -> *mut CResult {
+    assert!(!int_str.is_null());
+
+    let data_c_str: &CStr = unsafe { CStr::from_ptr(int_str) };
+    let data_str_slice: &str = data_c_str.to_str().unwrap();
+
+    let result = Int::from_str(data_str_slice);
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    Box::into_raw(Box::new(v)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
-    }
-    /**
-    * @param {string} string
-    * @returns {Int}
-    */
-    static from_str(string) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(string, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.int_from_str(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return Int.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn int_to_string(ptr: *mut Int) -> *const c_char {
+    let int = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = int.to_str();
+
+    let s = CString::new(result).unwrap();
+    let p = s.as_ptr();
+    std::mem::forget(s);
+    return p;
 }

@@ -1,5 +1,5 @@
 /**
- * @file c_str.h
+ * @file option.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,18 +17,21 @@
  * limitations under the License.
  */
 
-#ifndef CML_CSTR_H_
-#define CML_CSTR_H_
+#ifndef CML_OPTION_H_
+#define CML_OPTION_H_
+
+/* INCLUDES ******************************************************************/
+
+#include <stdbool.h>
+
+/* DEFINITIONS **************************************************************/
+
+typedef struct option option_t;
 
 /* PROTOTYPES ***************************************************************/
 
-/**
- * Frees a C string allocated in the Rust side of the FFI. 
- */
-void free_c_str(const char* str);
+void option_free(option_t* ptr);
+void* option_get_some(option_t* ptr);
+bool option_get_is_none(option_t* ptr);
 
-#endif /* CML_CSTR_H_ */
-
-
-
-
+#endif /* CML_OPTION_H_ */
