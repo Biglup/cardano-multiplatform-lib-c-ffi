@@ -39,7 +39,7 @@ unit_interval_t* unit_interval_new(big_num_t* numerator, big_num_t* denominator)
 void unit_interval_free(unit_interval_t* ptr);
 big_num_t* unit_interval_numerator(unit_interval_t* ptr);
 big_num_t* unit_interval_denominator(unit_interval_t* ptr);
-buffer_t* unit_interval_to_bytes(big_num_t* ptr);
+buffer_t* unit_interval_to_bytes(unit_interval_t* ptr);
 result_t* unit_interval_from_bytes(uint8_t* data, uint32_t size);
 result_t* unit_interval_from_json(const char* str);
 result_t* unit_interval_to_json(unit_interval_t* ptr);

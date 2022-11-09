@@ -1,5 +1,5 @@
 /**
- * @file cardano_multiplatform_lib.h
+ * @file asset_name.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,33 +17,28 @@
  * limitations under the License.
  */
 
-#ifndef CML_CARDANO_MULTIPLATFORM_LIB_H_
-#define CML_CARDANO_MULTIPLATFORM_LIB_H_
+#ifndef CML_ASSET_NAME_H_
+#define CML_ASSET_NAME_H_
 
 /* INCLUDES ******************************************************************/
 
-extern "C"
-{
-
-#include <cml/asset_name.h>
-#include <cml/big_num.h>
-#include <cml/buffer.h>
-#include <cml/coin_selection_strategy.h>
-#include <cml/encrypt.h>
-#include <cml/free.h>
-#include <cml/int.h>
-#include <cml/metadata_json_schema.h>
-#include <cml/network_info.h>
-#include <cml/option.h>
-#include <cml/plutus_data.h>
-#include <cml/plutus_datum_schema.h>
+#include <cstdint>
+#include <stdbool.h>
 #include <cml/result.h>
-#include <cml/transaction_metadatum.h>
-#include <cml/unit_interval.h>
+#include <cml/buffer.h>
 
-}
+/* DEFINITIONS **************************************************************/
 
-#endif /* CML_CARDANO_MULTIPLATFORM_LIB_H_ */
+typedef struct _asset_name_ asset_name_t;
 
+/* PROTOTYPES ***************************************************************/
 
+result_t* asset_name_new(uint8_t* data, uint32_t size);
+void asset_name_free(asset_name_t* ptr);
+buffer_t* asset_name_name(asset_name_t* ptr);
+buffer_t* asset_name_to_bytes(asset_name_t* ptr);
+result_t* asset_name_from_bytes(uint8_t* data, uint32_t size);
+result_t* asset_name_from_json(const char* str);
+result_t* asset_name_to_json(asset_name_t* ptr);
 
+#endif /* CML_ASSET_NAME_H_ */
