@@ -1,53 +1,54 @@
-/**
-export class Languages {
+extern crate cardano_multiplatform_lib;
+extern crate libc;
 
-    static __wrap(ptr) {
-        const obj = Object.create(Languages.prototype);
-        obj.ptr = ptr;
+use cardano_multiplatform_lib::plutus::Languages;
+use cardano_multiplatform_lib::plutus::Language;
 
-        return obj;
-    }
+#[no_mangle]
+pub extern "C" fn languages_new() -> *mut Languages {
+    return Box::into_raw(Box::new(Languages::new()));
+}
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+#[no_mangle]
+pub extern "C" fn languages_free(ptr: *mut Languages) {
+    assert!(!ptr.is_null());
 
-        return ptr;
+    unsafe {
+        Box::from_raw(ptr);
     }
+}
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_languages_free(ptr);
-    }
-    /**
-    * @returns {Languages}
-    */
-    static new() {
-        const ret = wasm.languages_new();
-        return Languages.__wrap(ret);
-    }
-    /**
-    * @returns {number}
-    */
-    len() {
-        const ret = wasm.languages_len(this.ptr);
-        return ret >>> 0;
-    }
-    /**
-    * @param {number} index
-    * @returns {Language}
-    */
-    get(index) {
-        const ret = wasm.languages_get(this.ptr, index);
-        return Language.__wrap(ret);
-    }
-    /**
-    * @param {Language} elem
-    */
-    add(elem) {
-        _assertClass(elem, Language);
-        var ptr0 = elem.ptr;
-        elem.ptr = 0;
-        wasm.languages_add(this.ptr, ptr0);
-    }
+#[no_mangle]
+pub extern "C" fn languages_len(ptr: *mut Languages) -> usize {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &*ptr
+    };
+
+    return val.len();
+}
+
+#[no_mangle]
+pub extern "C" fn languages_get(ptr: *mut Languages, index: usize) -> *mut Language {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &*ptr
+    };
+
+    return Box::into_raw(Box::new(val.get(index)));
+}
+
+#[no_mangle]
+pub extern "C" fn languages_add(ptr: *mut Languages, elem: *mut Language) {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let val2 = unsafe {
+        assert!(!elem.is_null());
+        &*elem
+    };
+
+    val.add(*val2);
 }

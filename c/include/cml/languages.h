@@ -1,5 +1,5 @@
 /**
- * @file cardano_multiplatform_lib.h
+ * @file languages.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,37 +17,25 @@
  * limitations under the License.
  */
 
-#ifndef CML_CARDANO_MULTIPLATFORM_LIB_H_
-#define CML_CARDANO_MULTIPLATFORM_LIB_H_
+#ifndef CML_LANGUAGES_H_
+#define CML_LANGUAGES_H_
 
 /* INCLUDES ******************************************************************/
 
-extern "C"
-{
-
+#include <cstdint>
 #include <cml/asset_name.h>
-#include <cml/asset_names.h>
-#include <cml/assets.h>
-#include <cml/big_num.h>
-#include <cml/buffer.h>
-#include <cml/coin_selection_strategy.h>
-#include <cml/encrypt.h>
-#include <cml/free.h>
-#include <cml/int.h>
-#include <cml/metadata_json_schema.h>
-#include <cml/network_info.h>
-#include <cml/option.h>
-#include <cml/plutus_data.h>
-#include <cml/plutus_datum_schema.h>
 #include <cml/result.h>
-#include <cml/transaction_metadatum.h>
-#include <cml/unit_interval.h>
-#include <cml/language.h>
-#include <cml/languages.h>
+#include <cml/buffer.h>
 
-}
+/* DEFINITIONS **************************************************************/
 
-#endif /* CML_CARDANO_MULTIPLATFORM_LIB_H_ */
+typedef struct _languages_ languages_t;
 
+/* PROTOTYPES ***************************************************************/
 
+void languages_free(languages_t* ptr);
+asset_name_t* languages_get(languages_t* ptr, uint64_t index);
+uint64_t languages_len(languages_t* ptr);
+void languages_add(languages_t* ptr, asset_name_t* element);
 
+#endif /* CML_languages_H_ */
