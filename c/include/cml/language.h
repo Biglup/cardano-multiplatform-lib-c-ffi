@@ -1,5 +1,5 @@
 /**
- * @file cardano_multiplatform_lib.h
+ * @file language.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,36 +17,28 @@
  * limitations under the License.
  */
 
-#ifndef CML_CARDANO_MULTIPLATFORM_LIB_H_
-#define CML_CARDANO_MULTIPLATFORM_LIB_H_
+#ifndef CML_LANGUAGE_H_
+#define CML_LANGUAGE_H_
 
 /* INCLUDES ******************************************************************/
 
-extern "C"
-{
-
-#include <cml/asset_name.h>
-#include <cml/asset_names.h>
-#include <cml/assets.h>
-#include <cml/big_num.h>
+#include <cstdint>
 #include <cml/buffer.h>
-#include <cml/coin_selection_strategy.h>
-#include <cml/encrypt.h>
-#include <cml/free.h>
-#include <cml/int.h>
-#include <cml/metadata_json_schema.h>
-#include <cml/network_info.h>
-#include <cml/option.h>
-#include <cml/plutus_data.h>
-#include <cml/plutus_datum_schema.h>
 #include <cml/result.h>
-#include <cml/transaction_metadatum.h>
-#include <cml/unit_interval.h>
-#include <cml/language.h>
+#include <cml/language_kind.h>
 
-}
+/* DEFINITIONS **************************************************************/
 
-#endif /* CML_CARDANO_MULTIPLATFORM_LIB_H_ */
+typedef struct _language_ language_t;
+
+/* PROTOTYPES ***************************************************************/
+
+void language_free(language_t* ptr);
+buffer_t* language_to_bytes(language_t* ptr);
+result_t* language_from_bytes(uint8_t* data, uint32_t size);
+language_t* language_new_plutus_v1();
+language_t* language_new_plutus_v2();
+LanguageKind language_kind(language_t* ptr);
 
 
-
+#endif /* CML_LANGUAGE_H_ */

@@ -5,6 +5,7 @@ use std::ffi::CStr;
 
 use cardano_multiplatform_lib::Assets;
 use cardano_multiplatform_lib::AssetName;
+use cardano_multiplatform_lib::AssetNames;
 use cardano_multiplatform_lib::ledger::common::value::BigNum;
 
 use crate::utils::CResult;
@@ -118,21 +119,6 @@ pub extern "C" fn assets_keys(ptr: *mut Assets) -> *mut AssetNames {
     };
 
     return Box::into_raw(Box::new(val1.keys()));
-}
-
-#[no_mangle]
-pub extern "C" fn assets_add(ptr: *mut Assets, elem: *mut AssetName) {
-    let val = unsafe {
-        assert!(!ptr.is_null());
-        &mut *ptr
-    };
-
-    let val2 = unsafe {
-        assert!(!elem.is_null());
-        &*elem
-    };
-
-    val.add(val2);
 }
 
 #[no_mangle]
