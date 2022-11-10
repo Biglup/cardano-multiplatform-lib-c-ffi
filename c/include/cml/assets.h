@@ -1,5 +1,5 @@
 /**
- * @file asset_names.h
+ * @file assets.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,30 +17,34 @@
  * limitations under the License.
  */
 
-#ifndef CML_ASSET_NAMES_H_
-#define CML_ASSET_NAMES_H_
+#ifndef CML_ASSETS_H_
+#define CML_ASSETS_H_
 
 /* INCLUDES ******************************************************************/
 
 #include <cstdint>
 #include <cml/asset_name.h>
+#include <cml/asset_names.h>
 #include <cml/result.h>
+#include <cml/big_num.h>
 #include <cml/buffer.h>
+#include <cml/option.h>
 
 /* DEFINITIONS **************************************************************/
 
-typedef struct _asset_names_ asset_names_t;
+typedef struct _assets_ assets_t;
 
 /* PROTOTYPES ***************************************************************/
 
-result_t* asset_names_new();
-void asset_names_free(asset_names_t* ptr);
-asset_name_t* asset_names_get(asset_names_t* ptr, uint64_t index);
-uint64_t asset_names_len(asset_names_t* ptr);
-void asset_names_add(asset_names_t* ptr, asset_name_t* element);
-buffer_t* asset_names_to_bytes(asset_names_t* ptr);
-result_t* asset_names_from_bytes(uint8_t* data, uint32_t size);
-result_t* asset_names_from_json(const char* str);
-result_t* asset_names_to_json(asset_names_t* ptr);
+assets_t* assets_new();
+void assets_free(assets_t* ptr);
+uint64_t assets_len(assets_t* ptr);
+option_t* assets_get(assets_t* ptr, asset_name_t* key);
+option_t* assets_insert(assets_t* ptr, asset_name_t* key, big_num_t* value);
+asset_names_t* assets_keys(assets_t* ptr);
+buffer_t* assets_to_bytes(assets_t* ptr);
+result_t* assets_from_bytes(uint8_t* data, uint32_t size);
+result_t* assets_from_json(const char* str);
+result_t* assets_to_json(assets_t* ptr);
 
-#endif /* CML_ASSET_NAMES_H_ */
+#endif /* CML_ASSETS_H_ */
