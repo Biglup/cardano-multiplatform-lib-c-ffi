@@ -22,7 +22,8 @@
 
 /* DECLARATIONS **************************************************************/
 
-enum MetadataJsonSchema {
+enum MetadataJsonSchema
+{
     METADATA_JSON_SCHEMA_NO_CONVERSIONS = 0,
     METADATA_JSON_SCHEMA_BASIC_CONVERSIONS = 1,
     METADATA_JSON_SCHEMA_DETAILED_SCHEMA = 2

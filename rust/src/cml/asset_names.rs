@@ -1,153 +1,151 @@
-/*
-/**
-*/
-export class AssetNames {
+extern crate cardano_multiplatform_lib;
+extern crate libc;
+use libc::c_char;
+use std::ffi::CStr;
 
-    static __wrap(ptr) {
-        const obj = Object.create(AssetNames.prototype);
-        obj.ptr = ptr;
+use cardano_multiplatform_lib::AssetNames;
+use cardano_multiplatform_lib::AssetName;
 
-        return obj;
-    }
+use crate::utils::CResult;
+use crate::utils::CBuffer;
+use crate::utils::get_error_message;
+use crate::utils::to_c_str;
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+#[no_mangle]
+pub extern "C" fn asset_names_new() -> *mut AssetNames {
+    return Box::into_raw(Box::new(AssetNames::new()));
+}
 
-        return ptr;
-    }
+#[no_mangle]
+pub extern "C" fn asset_names_free(ptr: *mut AssetNames) {
+    assert!(!ptr.is_null());
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_assetnames_free(ptr);
-    }
-    /**
-    * @returns {Uint8Array}
-    */
-    to_bytes() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.assetnames_to_bytes(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v0 = getArrayU8FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 1);
-            return v0;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {AssetNames}
-    */
-    static from_bytes(bytes) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.assetnames_from_bytes(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return AssetNames.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @returns {string}
-    */
-    to_json() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.assetnames_to_json(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            var r3 = getInt32Memory0()[retptr / 4 + 3];
-            var ptr0 = r0;
-            var len0 = r1;
-            if (r3) {
-                ptr0 = 0; len0 = 0;
-                throw takeObject(r2);
-            }
-            return getStringFromWasm0(ptr0, len0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(ptr0, len0);
-        }
-    }
-    /**
-    * @returns {any}
-    */
-    to_js_value() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.assetnames_to_js_value(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return takeObject(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @param {string} json
-    * @returns {AssetNames}
-    */
-    static from_json(json) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.assetnames_from_json(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return AssetNames.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @returns {AssetNames}
-    */
-    static new() {
-        const ret = wasm.assetnames_new();
-        return AssetNames.__wrap(ret);
-    }
-    /**
-    * @returns {number}
-    */
-    len() {
-        const ret = wasm.assetnames_len(this.ptr);
-        return ret >>> 0;
-    }
-    /**
-    * @param {number} index
-    * @returns {AssetName}
-    */
-    get(index) {
-        const ret = wasm.assetnames_get(this.ptr, index);
-        return AssetName.__wrap(ret);
-    }
-    /**
-    * @param {AssetName} elem
-    */
-    add(elem) {
-        _assertClass(elem, AssetName);
-        wasm.assetnames_add(this.ptr, elem.ptr);
+    unsafe {
+        Box::from_raw(ptr);
     }
 }
- */
+
+#[no_mangle]
+pub extern "C" fn asset_names_len(ptr: *mut AssetNames) -> usize {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &*ptr
+    };
+
+    return val.len();
+}
+
+#[no_mangle]
+pub extern "C" fn asset_names_get(ptr: *mut AssetNames, index: usize) -> *mut AssetName {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &*ptr
+    };
+
+    return Box::into_raw(Box::new(val.get(index)));
+}
+
+#[no_mangle]
+pub extern "C" fn asset_names_add(ptr: *mut AssetNames, elem: *mut AssetName) {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let val2 = unsafe {
+        assert!(!elem.is_null());
+        &*elem
+    };
+
+    val.add(val2);
+}
+
+#[no_mangle]
+pub extern "C" fn asset_names_to_bytes(ptr: *mut AssetNames) -> *mut CBuffer {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let     result = val.to_bytes();
+    let mut buf    = result.into_boxed_slice();
+    let     data   = buf.as_mut_ptr();
+    let     len    = buf.len() as i32;
+
+    std::mem::forget(buf);
+
+    return Box::into_raw(Box::new(CBuffer { len, data }));
+}
+
+#[no_mangle]
+pub extern "C" fn asset_names_from_bytes(ptr: *mut u8, size: usize) -> *mut CResult  {
+    assert!(!ptr.is_null());
+    assert!(size > 0);
+
+    let v = unsafe { core::slice::from_raw_parts(ptr, size as usize).to_vec() };
+
+    let ret = match AssetNames::from_bytes(v) {
+        Ok(int) => CResult {
+            result:    Box::into_raw(Box::new(int)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(message) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: to_c_str(message.to_string())
+        }
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn asset_names_from_json(int_str: *const c_char) -> *mut CResult {
+    assert!(!int_str.is_null());
+
+    let data_c_str: &CStr = unsafe { CStr::from_ptr(int_str) };
+    let data_str_slice: &str = data_c_str.to_str().unwrap();
+
+    let result = AssetNames::from_json(data_str_slice);
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    Box::into_raw(Box::new(v)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
+        }
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn asset_names_to_json(ptr: *mut AssetNames) -> *mut CResult {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = val.to_json();
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    to_c_str(v) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
+        }
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
