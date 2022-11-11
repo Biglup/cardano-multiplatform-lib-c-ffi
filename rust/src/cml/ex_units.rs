@@ -1,174 +1,177 @@
-/**
-export class ExUnits {
+extern crate cardano_multiplatform_lib;
+extern crate libc;
+use libc::c_char;
+use std::ffi::CStr;
 
-    static __wrap(ptr) {
-        const obj = Object.create(ExUnits.prototype);
-        obj.ptr = ptr;
+use cardano_multiplatform_lib::plutus::ExUnits;
+use cardano_multiplatform_lib::ledger::common::value::BigNum;
 
-        return obj;
-    }
+use crate::utils::CResult;
+use crate::utils::CBuffer;
+use crate::utils::get_error_message;
+use crate::utils::to_c_str;
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+#[no_mangle]
+pub extern "C" fn ex_units_new(mem: *mut BigNum, step: *mut BigNum) -> *mut ExUnits {
+    let val1 = unsafe {
+        assert!(!mem.is_null());
+        &mut* mem
+    };
 
-        return ptr;
-    }
+    let val2 = unsafe {
+        assert!(!step.is_null());
+        &mut* step
+    };
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_exunits_free(ptr);
+    Box::into_raw(Box::new(ExUnits::new(val1, val2)))
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_dummy() -> *mut ExUnits {
+    Box::into_raw(Box::new(ExUnits::dummy()))
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_free(ptr: *mut ExUnits) {
+    assert!(!ptr.is_null());
+
+    unsafe {
+        Box::from_raw(ptr);
     }
-    /**
-    * @returns {Uint8Array}
-    */
-    to_bytes() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.exunits_to_bytes(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v0 = getArrayU8FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 1);
-            return v0;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_mem(ptr: *mut ExUnits) -> *mut BigNum {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return Box::into_raw(Box::new(val.mem()));
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_step(ptr: *mut ExUnits) -> *mut BigNum {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return Box::into_raw(Box::new(val.steps()));
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_checked_add(ptr: *mut ExUnits, other: *mut ExUnits) -> *mut CResult {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let val2 = unsafe {
+        assert!(!other.is_null());
+        &mut *other
+    };
+
+    let ret = match val.checked_add(val2) {
+        Ok(int) => CResult {
+            result:    Box::into_raw(Box::new(int)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(message) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: to_c_str(message.to_string())
         }
-    }
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {ExUnits}
-    */
-    static from_bytes(bytes) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.exunits_from_bytes(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return ExUnits.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_to_bytes(ptr: *mut ExUnits) -> *mut CBuffer {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let     result = val.to_bytes();
+    let mut buf    = result.into_boxed_slice();
+    let     data   = buf.as_mut_ptr();
+    let     len    = buf.len() as i32;
+
+    std::mem::forget(buf);
+
+    return Box::into_raw(Box::new(CBuffer { len, data }));
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_from_bytes(ptr: *mut u8, size: usize) -> *mut CResult  {
+    assert!(!ptr.is_null());
+    assert!(size > 0);
+
+    let v = unsafe { core::slice::from_raw_parts(ptr, size as usize).to_vec() };
+
+    let ret = match ExUnits::from_bytes(v) {
+        Ok(int) => CResult {
+            result:    Box::into_raw(Box::new(int)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(message) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: to_c_str(message.to_string())
         }
-    }
-    /**
-    * @returns {string}
-    */
-    to_json() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.exunits_to_json(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            var r3 = getInt32Memory0()[retptr / 4 + 3];
-            var ptr0 = r0;
-            var len0 = r1;
-            if (r3) {
-                ptr0 = 0; len0 = 0;
-                throw takeObject(r2);
-            }
-            return getStringFromWasm0(ptr0, len0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(ptr0, len0);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_from_json(int_str: *const c_char) -> *mut CResult {
+    assert!(!int_str.is_null());
+
+    let data_c_str: &CStr = unsafe { CStr::from_ptr(int_str) };
+    let data_str_slice: &str = data_c_str.to_str().unwrap();
+
+    let result = ExUnits::from_json(data_str_slice);
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    Box::into_raw(Box::new(v)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
-    }
-    /**
-    * @returns {any}
-    */
-    to_js_value() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.exunits_to_js_value(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return takeObject(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn ex_units_to_json(ptr: *mut ExUnits) -> *mut CResult {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = val.to_json();
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    to_c_str(v) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
-    }
-    /**
-    * @param {string} json
-    * @returns {ExUnits}
-    */
-    static from_json(json) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.exunits_from_json(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return ExUnits.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * @returns {BigNum}
-    */
-    mem() {
-        const ret = wasm.exunits_mem(this.ptr);
-        return BigNum.__wrap(ret);
-    }
-    /**
-    * @returns {BigNum}
-    */
-    steps() {
-        const ret = wasm.exunits_steps(this.ptr);
-        return BigNum.__wrap(ret);
-    }
-    /**
-    * @param {BigNum} mem
-    * @param {BigNum} steps
-    * @returns {ExUnits}
-    */
-    static new(mem, steps) {
-        _assertClass(mem, BigNum);
-        _assertClass(steps, BigNum);
-        const ret = wasm.exunits_new(mem.ptr, steps.ptr);
-        return ExUnits.__wrap(ret);
-    }
-    /**
-    * @param {ExUnits} other
-    * @returns {ExUnits}
-    */
-    checked_add(other) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            _assertClass(other, ExUnits);
-            wasm.exunits_checked_add(retptr, this.ptr, other.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return ExUnits.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
-    }
-    /**
-    * used to create a dummy ExUnits that takes up the maximum size possible in cbor to provide an upper bound on tx size
-    * @returns {ExUnits}
-    */
-    static dummy() {
-        const ret = wasm.exunits_dummy();
-        return ExUnits.__wrap(ret);
-    }
+    };
+
+    return Box::into_raw(Box::new(ret));
 }

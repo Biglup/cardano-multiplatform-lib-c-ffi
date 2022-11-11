@@ -1,5 +1,5 @@
 /**
- * @file cardano_multiplatform_lib.h
+ * @file ex_units.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,37 +17,34 @@
  * limitations under the License.
  */
 
-#ifndef CML_CARDANO_MULTIPLATFORM_LIB_H_
-#define CML_CARDANO_MULTIPLATFORM_LIB_H_
+#ifndef CML_ex_units_H_
+#define CML_ex_units_H_
 
 /* INCLUDES ******************************************************************/
 
-#include <cml/asset_name.h>
-#include <cml/asset_names.h>
-#include <cml/assets.h>
+#include <cstdint>
+#include <stdbool.h>
 #include <cml/big_num.h>
-#include <cml/buffer.h>
-#include <cml/coin_selection_strategy.h>
-#include <cml/cost_model.h>
-#include <cml/costmdls.h>
-#include <cml/encrypt.h>
-#include <cml/ex_units.h>
-#include <cml/ex_unit_prices.h>
-#include <cml/free.h>
-#include <cml/int.h>
-#include <cml/language_kind.h>
-#include <cml/language.h>
-#include <cml/languages.h>
-#include <cml/metadata_json_schema.h>
-#include <cml/network_info.h>
 #include <cml/option.h>
-#include <cml/plutus_data.h>
-#include <cml/plutus_datum_schema.h>
 #include <cml/result.h>
-#include <cml/transaction_metadatum.h>
+#include <cml/buffer.h>
 #include <cml/unit_interval.h>
 
-#endif /* CML_CARDANO_MULTIPLATFORM_LIB_H_ */
+/* DEFINITIONS **************************************************************/
 
+typedef struct _ex_units_ ex_units_t;
 
+/* PROTOTYPES ***************************************************************/
 
+ex_units_t* ex_units_new(big_num_t* mem, big_num_t* step);
+ex_units_t* ex_units_dummy();
+void ex_units_free(ex_units_t* ptr);
+big_num_t* ex_units_mem(ex_units_t* ptr);
+big_num_t* ex_units_step(ex_units_t* ptr);
+result_t* ex_units_checked_add(ex_units_t* ptr, ex_units_t* other);
+buffer_t* ex_units_to_bytes(ex_units_t* ptr);
+result_t* ex_units_from_bytes(uint8_t* data, uint32_t size);
+result_t* ex_units_from_json(const char* str);
+result_t* ex_units_to_json(ex_units_t* ptr);
+
+#endif /* CML_ex_units_H_ */
