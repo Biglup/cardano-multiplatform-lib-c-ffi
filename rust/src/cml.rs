@@ -13,4 +13,5 @@ mod script_hashes;
 mod language;
 mod languages;
 mod linear_fee;
+mod multi_asset;
 mod unit_interval;

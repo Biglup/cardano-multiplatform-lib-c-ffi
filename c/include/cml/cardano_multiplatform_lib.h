@@ -40,6 +40,7 @@
 #include <cml/languages.h>
 #include <cml/linear_fee.h>
 #include <cml/metadata_json_schema.h>
+#include <cml/multi_asset.h>
 #include <cml/network_info.h>
 #include <cml/option.h>
 #include <cml/plutus_data.h>
