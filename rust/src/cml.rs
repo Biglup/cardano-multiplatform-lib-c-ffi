@@ -4,6 +4,7 @@ mod assets;
 mod big_num;
 mod cost_model;
 mod costmdls;
+mod ex_unit_prices;
 mod int;
 mod network_info;
 mod language;

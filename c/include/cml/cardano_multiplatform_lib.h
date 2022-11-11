@@ -34,6 +34,7 @@ extern "C"
 #include <cml/cost_model.h>
 #include <cml/costmdls.h>
 #include <cml/encrypt.h>
+#include <cml/ex_unit_prices.h>
 #include <cml/free.h>
 #include <cml/int.h>
 #include <cml/language_kind.h>
