@@ -37,7 +37,6 @@ pub extern "C" fn encode_arbitrary_bytes_as_metadatum(ptr: *mut u8, size: usize)
     }
 }
 
-
 // decodes from chunks of bytes in a list to a byte vector if that is the metadata format, otherwise returns None
 #[no_mangle]
 pub extern "C" fn decode_arbitrary_bytes_from_metadatum(ptr: *mut TransactionMetadatum) -> *mut CBuffer {
@@ -62,11 +61,6 @@ pub extern "C" fn decode_arbitrary_bytes_from_metadatum(ptr: *mut TransactionMet
     return Box::into_raw(Box::new(CBuffer { len, data }));
 }
 
-
-
-//let p: *const i32 = ptr::null();
-
-
 fn metadata_json_schema_from_u32(value: u32) -> MetadataJsonSchema {
     match value {
         0 => MetadataJsonSchema::NoConversions,
@@ -75,7 +69,6 @@ fn metadata_json_schema_from_u32(value: u32) -> MetadataJsonSchema {
         _ => panic!("Unknown value: {}", value),
     }
 }
-
 
 // metadata
 #[no_mangle]
@@ -170,7 +163,6 @@ pub extern "C" fn decrypt_with_password(password: *const c_char, data: *const c_
         }
     };
 }
-
 
 
 fn plutus_datum_schema_from_u32(value: u32) -> PlutusDatumSchema {
@@ -545,15 +537,6 @@ export function make_vkey_witness(tx_body_hash, sk) {
     return Vkeywitness.__wrap(ret);
 }
 
-function handleError(f, args) {
-    try {
-        return f.apply(this, args);
-    } catch (e) {
-        wasm.__wbindgen_exn_store(addHeapObject(e));
-    }
-}
-
-
 export const DatumKind = Object.freeze({ Hash:0,"0":"Hash",Inline:1,"1":"Inline", });
 
 
@@ -573,9 +556,6 @@ export const NativeScriptKind = Object.freeze({ ScriptPubkey:0,"0":"ScriptPubkey
 
 
 export const NetworkIdKind = Object.freeze({ Testnet:0,"0":"Testnet",Mainnet:1,"1":"Mainnet", });
-
-
-export const LanguageKind = Object.freeze({ PlutusV1:0,"0":"PlutusV1",PlutusV2:1,"1":"PlutusV2", });
 
 
 export const PlutusDataKind = Object.freeze({ ConstrPlutusData:0,"0":"ConstrPlutusData",Map:1,"1":"Map",List:2,"2":"List",Integer:3,"3":"Integer",Bytes:4,"4":"Bytes", });
@@ -664,25 +644,6 @@ export const StakeCredKind = Object.freeze({ Key:0,"0":"Key",Script:1,"1":"Scrip
 * Use `header_matches_kind` if you don't want to implement the bitwise operators yourself
 
 export const AddressHeaderKind = Object.freeze({ BasePaymentKeyStakeKey:0,"0":"BasePaymentKeyStakeKey",BasePaymentScriptStakeKey:1,"1":"BasePaymentScriptStakeKey",BasePaymentKeyStakeScript:2,"2":"BasePaymentKeyStakeScript",BasePaymentScriptStakeScript:3,"3":"BasePaymentScriptStakeScript",PointerKey:4,"4":"PointerKey",PointerScript:5,"5":"PointerScript",EnterpriseKey:6,"6":"EnterpriseKey",EnterpriseScript:7,"7":"EnterpriseScript",Byron:8,"8":"Byron",RewardKey:14,"14":"RewardKey",RewardScript:15,"15":"RewardScript", });
-
-
-export const CoinSelectionStrategyCIP2 = Object.freeze({
-
-* Performs CIP2's Largest First ada-only selection. Will error if outputs contain non-ADA assets.
-
-LargestFirst:0,"0":"LargestFirst",
-
-* Performs CIP2's Random Improve ada-only selection. Will error if outputs contain non-ADA assets.
-
-RandomImprove:1,"1":"RandomImprove",
-
-* Same as LargestFirst, but before adding ADA, will insert by largest-first for each asset type.
-
-LargestFirstMultiAsset:2,"2":"LargestFirstMultiAsset",
-
-* Same as RandomImprove, but before adding ADA, will insert by random-improve for each asset type.
-
-RandomImproveMultiAsset:3,"3":"RandomImproveMultiAsset", });
 
 
 export const ChangeSelectionAlgo = Object.freeze({ Default:0,"0":"Default", });

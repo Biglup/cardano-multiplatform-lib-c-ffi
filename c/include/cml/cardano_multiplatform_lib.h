@@ -31,9 +31,14 @@ extern "C"
 #include <cml/big_num.h>
 #include <cml/buffer.h>
 #include <cml/coin_selection_strategy.h>
+#include <cml/cost_model.h>
+#include <cml/costmdls.h>
 #include <cml/encrypt.h>
 #include <cml/free.h>
 #include <cml/int.h>
+#include <cml/language_kind.h>
+#include <cml/language.h>
+#include <cml/languages.h>
 #include <cml/metadata_json_schema.h>
 #include <cml/network_info.h>
 #include <cml/option.h>
@@ -42,8 +47,6 @@ extern "C"
 #include <cml/result.h>
 #include <cml/transaction_metadatum.h>
 #include <cml/unit_interval.h>
-#include <cml/language.h>
-#include <cml/languages.h>
 
 }
 

@@ -1,160 +1,206 @@
-/**
-export class Costmdls {
+extern crate cardano_multiplatform_lib;
+extern crate libc;
+use libc::c_char;
+use std::ffi::CStr;
 
-    static __wrap(ptr) {
-        const obj = Object.create(Costmdls.prototype);
-        obj.ptr = ptr;
+use cardano_multiplatform_lib::plutus::Language;
+use cardano_multiplatform_lib::plutus::Languages;
+use cardano_multiplatform_lib::plutus::CostModel;
+use cardano_multiplatform_lib::plutus::Costmdls;
 
-        return obj;
-    }
+use crate::utils::CResult;
+use crate::utils::CBuffer;
+use crate::utils::COption;
+use crate::utils::get_error_message;
+use crate::utils::to_c_str;
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+#[no_mangle]
+pub extern "C" fn costmdls_new() -> *mut Costmdls {
+    return Box::into_raw(Box::new(Costmdls::new()));
+}
 
-        return ptr;
-    }
+#[no_mangle]
+pub extern "C" fn costmdls_free(ptr: *mut Costmdls) {
+    assert!(!ptr.is_null());
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_costmdls_free(ptr);
+    unsafe {
+        Box::from_raw(ptr);
     }
-    /**
-    * @returns {Uint8Array}
-    */
-    to_bytes() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.costmdls_to_bytes(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v0 = getArrayU8FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 1);
-            return v0;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_len(ptr: *mut Costmdls) -> usize {
+    assert!(!ptr.is_null());
+
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &*ptr
+    };
+
+    return val.len();
+}
+
+
+#[no_mangle]
+pub extern "C" fn costmdls_insert(ptr: *mut Costmdls, value: *mut CostModel) -> *mut COption {
+    assert!(!ptr.is_null());
+    assert!(!value.is_null());
+
+    let val1 = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let val2 = unsafe {
+        assert!(!value.is_null());
+        &mut* value
+    };
+
+    let result = val1.insert(val2);
+
+    let ret = match result {
+        Some(v) => COption {
+            some:    Box::into_raw(Box::new(v)) as *mut u8,
+            is_none: 0
+        },
+        None => COption {
+            some:    std::ptr::null_mut(),
+            is_none: 1,
         }
-    }
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {Costmdls}
-    */
-    static from_bytes(bytes) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.costmdls_from_bytes(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return Costmdls.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_get(ptr: *mut Costmdls, key: *mut Language) -> *mut COption {
+    assert!(!ptr.is_null());
+    assert!(!key.is_null());
+
+    let val1 = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let val2 = unsafe {
+        assert!(!key.is_null());
+        &mut* key
+    };
+
+    let result = val1.get(val2);
+
+    let ret = match result {
+        Some(v) => COption {
+            some:    Box::into_raw(Box::new(v)) as *mut u8,
+            is_none: 0
+        },
+        None => COption {
+            some:    std::ptr::null_mut(),
+            is_none: 1,
         }
-    }
-    /**
-    * @returns {string}
-    */
-    to_json() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.costmdls_to_json(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            var r3 = getInt32Memory0()[retptr / 4 + 3];
-            var ptr0 = r0;
-            var len0 = r1;
-            if (r3) {
-                ptr0 = 0; len0 = 0;
-                throw takeObject(r2);
-            }
-            return getStringFromWasm0(ptr0, len0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(ptr0, len0);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_keys(ptr: *mut Costmdls) -> *mut Languages {
+    assert!(!ptr.is_null());
+
+    let val1 = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    return Box::into_raw(Box::new(val1.keys()));
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_to_bytes(ptr: *mut Costmdls) -> *mut CBuffer {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let     result = val.to_bytes();
+    let mut buf    = result.into_boxed_slice();
+    let     data   = buf.as_mut_ptr();
+    let     len    = buf.len() as i32;
+
+    std::mem::forget(buf);
+
+    return Box::into_raw(Box::new(CBuffer { len, data }));
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_from_bytes(ptr: *mut u8, size: usize) -> *mut CResult  {
+    assert!(!ptr.is_null());
+    assert!(size > 0);
+
+    let v = unsafe { core::slice::from_raw_parts(ptr, size as usize).to_vec() };
+
+    let ret = match Costmdls::from_bytes(v) {
+        Ok(int) => CResult {
+            result:    Box::into_raw(Box::new(int)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(message) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: to_c_str(message.to_string())
         }
-    }
-    /**
-    * @returns {any}
-    */
-    to_js_value() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.costmdls_to_js_value(retptr, this.ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return takeObject(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_from_json(int_str: *const c_char) -> *mut CResult {
+    assert!(!int_str.is_null());
+
+    let data_c_str: &CStr = unsafe { CStr::from_ptr(int_str) };
+    let data_str_slice: &str = data_c_str.to_str().unwrap();
+
+    let result = Costmdls::from_json(data_str_slice);
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    Box::into_raw(Box::new(v)) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
-    }
-    /**
-    * @param {string} json
-    * @returns {Costmdls}
-    */
-    static from_json(json) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            const len0 = WASM_VECTOR_LEN;
-            wasm.costmdls_from_json(retptr, ptr0, len0);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return Costmdls.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
+    };
+
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn costmdls_to_json(ptr: *mut Costmdls) -> *mut CResult {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut* ptr
+    };
+
+    let result = val.to_json();
+
+    let ret = match result {
+        Ok(v) => CResult {
+            result:    to_c_str(v) as *mut u8,
+            has_error: 0,
+            error_msg: std::ptr::null_mut()
+        },
+        Err(js_value) => CResult {
+            result:    std::ptr::null_mut(),
+            has_error: 1,
+            error_msg: get_error_message(js_value)
         }
-    }
-    /**
-    * @returns {Costmdls}
-    */
-    static new() {
-        const ret = wasm.costmdls_new();
-        return Costmdls.__wrap(ret);
-    }
-    /**
-    * @returns {number}
-    */
-    len() {
-        const ret = wasm.costmdls_len(this.ptr);
-        return ret >>> 0;
-    }
-    /**
-    * @param {CostModel} value
-    * @returns {CostModel | undefined}
-    */
-    insert(value) {
-        _assertClass(value, CostModel);
-        const ret = wasm.costmdls_insert(this.ptr, value.ptr);
-        return ret === 0 ? undefined : CostModel.__wrap(ret);
-    }
-    /**
-    * @param {Language} key
-    * @returns {CostModel | undefined}
-    */
-    get(key) {
-        _assertClass(key, Language);
-        const ret = wasm.costmdls_get(this.ptr, key.ptr);
-        return ret === 0 ? undefined : CostModel.__wrap(ret);
-    }
-    /**
-    * @returns {Languages}
-    */
-    keys() {
-        const ret = wasm.costmdls_keys(this.ptr);
-        return Languages.__wrap(ret);
-    }
+    };
+
+    return Box::into_raw(Box::new(ret));
 }

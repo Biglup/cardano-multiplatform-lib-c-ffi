@@ -2,6 +2,8 @@ mod asset_name;
 mod asset_names;
 mod assets;
 mod big_num;
+mod cost_model;
+mod costmdls;
 mod int;
 mod network_info;
 mod language;
