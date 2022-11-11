@@ -8,6 +8,7 @@ mod ex_unit_prices;
 mod ex_units;
 mod int;
 mod network_info;
+mod script_hash;
 mod language;
 mod languages;
 mod linear_fee;
