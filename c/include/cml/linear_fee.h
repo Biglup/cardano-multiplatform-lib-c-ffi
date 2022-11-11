@@ -1,5 +1,5 @@
 /**
- * @file cardano_multiplatform_lib.h
+ * @file linear_fee.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,38 +17,27 @@
  * limitations under the License.
  */
 
-#ifndef CML_CARDANO_MULTIPLATFORM_LIB_H_
-#define CML_CARDANO_MULTIPLATFORM_LIB_H_
+#ifndef CML_LINEAR_FEE_H_
+#define CML_LINEAR_FEE_H_
 
 /* INCLUDES ******************************************************************/
 
-#include <cml/asset_name.h>
-#include <cml/asset_names.h>
-#include <cml/assets.h>
+#include <cstdint>
+#include <stdbool.h>
 #include <cml/big_num.h>
-#include <cml/buffer.h>
-#include <cml/coin_selection_strategy.h>
-#include <cml/cost_model.h>
-#include <cml/costmdls.h>
-#include <cml/encrypt.h>
-#include <cml/ex_units.h>
-#include <cml/ex_unit_prices.h>
-#include <cml/free.h>
-#include <cml/int.h>
-#include <cml/language_kind.h>
-#include <cml/language.h>
-#include <cml/languages.h>
-#include <cml/linear_fee.h>
-#include <cml/metadata_json_schema.h>
-#include <cml/network_info.h>
 #include <cml/option.h>
-#include <cml/plutus_data.h>
-#include <cml/plutus_datum_schema.h>
 #include <cml/result.h>
-#include <cml/transaction_metadatum.h>
-#include <cml/unit_interval.h>
+#include <cml/buffer.h>
 
-#endif /* CML_CARDANO_MULTIPLATFORM_LIB_H_ */
+/* DEFINITIONS **************************************************************/
 
+typedef struct _linear_fee_ linear_fee_t;
 
+/* PROTOTYPES ***************************************************************/
 
+linear_fee_t* linear_fee_new(big_num_t* coefficient, big_num_t* constant);
+void linear_fee_free(linear_fee_t* ptr);
+big_num_t* linear_fee_coefficient(linear_fee_t* ptr);
+big_num_t* linear_fee_constant(linear_fee_t* ptr);
+
+#endif /* CML_LINEAR_FEE_H_ */

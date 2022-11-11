@@ -1,49 +1,50 @@
-/**
-* Careful: although the linear fee is the same for Byron & Shelley
-* The value of the parameters and how fees are computed is not the same
-export class LinearFee {
+extern crate cardano_multiplatform_lib;
+extern crate libc;
 
-    static __wrap(ptr) {
-        const obj = Object.create(LinearFee.prototype);
-        obj.ptr = ptr;
+use cardano_multiplatform_lib::ledger::alonzo::fees::LinearFee;
+use cardano_multiplatform_lib::ledger::common::value::BigNum;
 
-        return obj;
-    }
+#[no_mangle]
+pub extern "C" fn linear_fee_free(ptr: *mut LinearFee) {
+    assert!(!ptr.is_null());
 
-    __destroy_into_raw() {
-        const ptr = this.ptr;
-        this.ptr = 0;
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
 
-        return ptr;
-    }
+#[no_mangle]
+pub extern "C" fn linear_fee_new(coefficient: *mut BigNum, constant: *mut BigNum) -> *mut LinearFee {
+    let val = unsafe {
+        assert!(!coefficient.is_null());
+        &mut *coefficient
+    };
 
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_linearfee_free(ptr);
-    }
-    /**
-    * @returns {BigNum}
-    */
-    constant() {
-        const ret = wasm.linearfee_constant(this.ptr);
-        return BigNum.__wrap(ret);
-    }
-    /**
-    * @returns {BigNum}
-    */
-    coefficient() {
-        const ret = wasm.linearfee_coefficient(this.ptr);
-        return BigNum.__wrap(ret);
-    }
-    /**
-    * @param {BigNum} coefficient
-    * @param {BigNum} constant
-    * @returns {LinearFee}
-    */
-    static new(coefficient, constant) {
-        _assertClass(coefficient, BigNum);
-        _assertClass(constant, BigNum);
-        const ret = wasm.linearfee_new(coefficient.ptr, constant.ptr);
-        return LinearFee.__wrap(ret);
-    }
+    let val2 = unsafe {
+        assert!(!constant.is_null());
+        &mut *constant
+    };
+
+    return Box::into_raw(Box::new(LinearFee::new(val, val2)));
+}
+
+#[no_mangle]
+pub extern "C" fn linear_fee_coefficient(ptr: *mut LinearFee) -> *mut BigNum {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    Box::into_raw(Box::new(val.coefficient()))
+}
+
+#[no_mangle]
+pub extern "C" fn linear_fee_constant(ptr: *mut LinearFee) -> *mut BigNum {
+    let val = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    Box::into_raw(Box::new(val.constant()))
+
 }

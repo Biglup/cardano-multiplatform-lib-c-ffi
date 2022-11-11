@@ -10,4 +10,5 @@ mod int;
 mod network_info;
 mod language;
 mod languages;
+mod linear_fee;
 mod unit_interval;
