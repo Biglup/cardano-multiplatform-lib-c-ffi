@@ -46,6 +46,7 @@
 #include <cml/plutus_datum_schema.h>
 #include <cml/result.h>
 #include <cml/script_hash.h>
+#include <cml/script_hashes.h>
 #include <cml/transaction_metadatum.h>
 #include <cml/unit_interval.h>
 

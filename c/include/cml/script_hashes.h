@@ -1,5 +1,5 @@
 /**
- * @file asset_names.h
+ * @file script_hashes.h
  *
  * @author Angel Castillo <angel.castillob@protonmail.com>
  * @date   Sep 08 2022
@@ -17,30 +17,30 @@
  * limitations under the License.
  */
 
-#ifndef CML_ASSET_NAMES_H_
-#define CML_ASSET_NAMES_H_
+#ifndef CML_SCRIPT_HASHES_H_
+#define CML_SCRIPT_HASHES_H_
 
 /* INCLUDES ******************************************************************/
 
 #include <cstdint>
-#include <cml/asset_name.h>
+#include <cml/script_hash.h>
 #include <cml/result.h>
 #include <cml/buffer.h>
 
 /* DEFINITIONS **************************************************************/
 
-typedef struct _asset_names_ asset_names_t;
+typedef struct _script_hashes_ script_hashes_t;
 
 /* PROTOTYPES ***************************************************************/
 
-asset_name_t* asset_names_new();
-void asset_names_free(asset_names_t* ptr);
-asset_name_t* asset_names_get(asset_names_t* ptr, uint64_t index);
-uint64_t asset_names_len(asset_names_t* ptr);
-void asset_names_add(asset_names_t* ptr, asset_name_t* element);
-buffer_t* asset_names_to_bytes(asset_names_t* ptr);
-result_t* asset_names_from_bytes(uint8_t* data, uint32_t size);
-result_t* asset_names_from_json(const char* str);
-result_t* asset_names_to_json(asset_names_t* ptr);
+script_hashes_t* script_hashes_new();
+void script_hashes_free(script_hashes_t* ptr);
+script_hash_t* script_hashes_get(script_hashes_t* ptr, uint64_t index);
+uint64_t script_hashes_len(script_hashes_t* ptr);
+void script_hashes_add(script_hashes_t* ptr, script_hash_t* element);
+buffer_t* script_hashes_to_bytes(script_hashes_t* ptr);
+result_t* script_hashes_from_bytes(uint8_t* data, uint32_t size);
+result_t* script_hashes_from_json(const char* str);
+result_t* script_hashes_to_json(script_hashes_t* ptr);
 
-#endif /* CML_ASSET_NAMES_H_ */
+#endif /* CML_SCRIPT_HASHES_H_ */
