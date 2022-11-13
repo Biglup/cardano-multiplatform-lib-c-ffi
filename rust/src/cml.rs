@@ -15,3 +15,4 @@ mod languages;
 mod linear_fee;
 mod multi_asset;
 mod unit_interval;
+mod value;

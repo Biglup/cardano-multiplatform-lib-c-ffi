@@ -43,6 +43,7 @@
 #include <cml/multi_asset.h>
 #include <cml/network_info.h>
 #include <cml/option.h>
+#include <cml/ordering.h>
 #include <cml/plutus_data.h>
 #include <cml/plutus_datum_schema.h>
 #include <cml/result.h>
