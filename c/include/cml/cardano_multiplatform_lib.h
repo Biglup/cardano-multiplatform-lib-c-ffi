@@ -49,6 +49,8 @@
 #include <cml/result.h>
 #include <cml/script_hash.h>
 #include <cml/script_hashes.h>
+#include <cml/transaction_builder_config_builder.h>
+#include <cml/transaction_builder_config.h>
 #include <cml/transaction_metadatum.h>
 #include <cml/unit_interval.h>
 

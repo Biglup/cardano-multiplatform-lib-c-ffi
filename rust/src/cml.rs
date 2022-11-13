@@ -10,6 +10,8 @@ mod int;
 mod network_info;
 mod script_hash;
 mod script_hashes;
+mod transaction_builder_config_builder;
+mod transaction_builder_config;
 mod language;
 mod languages;
 mod linear_fee;
